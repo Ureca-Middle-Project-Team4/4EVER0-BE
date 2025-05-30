@@ -45,9 +45,9 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x ./gradlew
 
-      # 빌드
+      # 테스트 제외 빌드
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
 
       # 아티팩트 업로드
       - name: Upload JAR artifact

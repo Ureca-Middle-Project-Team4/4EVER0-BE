@@ -35,3 +35,10 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
     display-request-duration: true
+
+fastapi:
+  recommend:
+    host: ${FASTAPI_HOST:localhost}
+    port: ${FASTAPI_PORT:8000}
+    path: /api/multi-recommend
+
