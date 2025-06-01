@@ -1,7 +1,6 @@
 name: 'Feature request'
-about: '새로운 기능을 제안하기 위한 양식입니다. 생성된 이슈는 Jira와 연동됩니다.'
+description: '새로운 기능을 제안하기 위한 양식입니다. 생성된 이슈는 Jira와 연동됩니다.'
 labels: [enhancement]
-assignees: []
 title: '[FEAT] 이슈 이름을 작성해주세요'
 body:
   - type: input

@@ -1,7 +1,6 @@
 name: 'Bug report'
-about: '버그 리포트를 위한 양식입니다. 생성된 이슈는 Jira와 연동됩니다.'
+description: '버그 리포트를 위한 양식입니다. 생성된 이슈는 Jira와 연동됩니다.'
 labels: [bug]
-assignees: []
 title: '[BUG] 이슈 이름을 작성해주세요'
 body:
   - type: input
