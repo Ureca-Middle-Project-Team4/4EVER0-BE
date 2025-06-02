@@ -26,6 +26,16 @@ jobs:
         with:
           ref: main
 
+      - name: Select Issue-Form Template
+        id: select-template
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          if [[ "$TITLE" == "[BUG]"* ]]; then
+            echo "template_path=.github/ISSUE_TEMPLATE/bug-report-form.yml" >> $GITHUB_OUTPUT
+          else
+            echo "template_path=.github/ISSUE_TEMPLATE/feature-request-form.yml" >> $GITHUB_OUTPUT
+          fi
+
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
