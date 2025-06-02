@@ -3,6 +3,23 @@ description: '버그 리포트를 위한 양식입니다. 생성된 이슈는 Ji
 labels: [bug]
 title: '[BUG] 이슈 이름을 작성해주세요'
 body:
+  - type: dropdown
+    id: issuetype
+    attributes:
+      label: '🔖 이슈 유형 (Jira Issue Type)'
+      description: 'Jira 상에서 사용할 이슈 타입을 선택해주세요'
+      options:
+        - label: Task
+          value: Task
+        - label: Sub-task
+          value: Sub-task
+        - label: Story
+          value: Story
+        - label: Epic
+          value: Epic
+    validations:
+      required: true
+
   - type: input
     id: parentKey
     attributes:
