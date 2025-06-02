@@ -5,11 +5,11 @@ on:
 
 jobs:
   close-issue:
-    name: Close linked Jira issue
+    name: Close Jira issue
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -22,26 +22,25 @@ jobs:
           JIRA_API_TOKEN:  ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      # 조건 분기로 템플릿 분리 - run 제거
-      - name: Use BUG template
-        if: startsWith(github.event.issue.title, '[BUG]')
-        id: select-bug
-        run: echo "template_path=.github/ISSUE_TEMPLATE/bug-report-form.yml" >> $GITHUB_OUTPUT
+      - name: Extract Jira Key from issue comments
+        id: extract-jira-key
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --jq '.[].body')
+          echo "$COMMENTS" | grep -oE 'Jira Issue Created: \[([A-Z]+-[0-9]+)\]' | head -n1 | grep -oE '[A-Z]+-[0-9]+' > jira-key.txt
 
-      - name: Use FEATURE template
-        if: ${{ !startsWith(github.event.issue.title, '[BUG]') }}
-        id: select-feature
-        run: echo "template_path=.github/ISSUE_TEMPLATE/feature-request-form.yml" >> $GITHUB_OUTPUT
-
-      - name: Parse GitHub Issue
-        uses: stefanbuck/github-issue-praser@v3
-        id: issue-parser
-        with:
-          template-path: ${{ steps.select-bug.outputs.template_path || steps.select-feature.outputs.template_path }}
-          issue-body:    ${{ github.event.issue.body }}
+          if [[ -s jira-key.txt ]]; then
+            KEY=$(cat jira-key.txt)
+            echo "✅ Extracted Jira key: $KEY"
+            echo "JIRA_KEY=$KEY" >> $GITHUB_ENV
+          else
+            echo "❌ Failed to extract Jira key from comments."
+            exit 1
+          fi
 
       - name: Transition Jira issue to 완료
         uses: atlassian/gajira-transition@v3
         with:
-          issue:        ${{ steps.issue-parser.outputs.issueparser_jiraKey }}
+          issue:        ${{ env.JIRA_KEY }}
           transitionId: '31'
