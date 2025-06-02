@@ -9,14 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) main 브랜치 체크아웃 → 템플릿이 있는 브랜치
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
 
-      # 2) Jira 로그인
       - name: Login to Jira
         uses: atlassian/gajira-login@v3
         env:
@@ -24,34 +22,25 @@ jobs:
           JIRA_API_TOKEN:  ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      # 3) 이슈 제목이 [BUG]인지 아닌지를 보고 템플릿 선택
-      - name: Select Issue-Form Template
-        id: select-template
+      - name: Extract Jira Key from issue comments
+        id: extract-jira-key
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          if [[ "$TITLE" == "[BUG]"* ]]; then
-            echo "template_path=.github/ISSUE_TEMPLATE/bug-report-form.yml" >> $GITHUB_OUTPUT
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --jq '.[].body')
+          echo "$COMMENTS" | grep -oE 'Jira Issue Created: \[([A-Z]+-[0-9]+)\]' | head -n1 | grep -oE '[A-Z]+-[0-9]+' > jira-key.txt
+
+          if [[ -s jira-key.txt ]]; then
+            KEY=$(cat jira-key.txt)
+            echo "✅ Extracted Jira key: $KEY"
+            echo "JIRA_KEY=$KEY" >> $GITHUB_ENV
           else
-            echo "template_path=.github/ISSUE_TEMPLATE/feature-request-form.yml" >> $GITHUB_OUTPUT
+            echo "❌ Failed to extract Jira key from comments."
+            exit 1
           fi
 
-      # 4) Issue Parser (jiraKey만 추출하면 됨)
-      - name: Issue Parser
-        uses: stefanbuck/github-issue-praser@v3
-        id: issue-parser
-        with:
-          template-path: ${{ steps.select-template.outputs.template_path }}
-          issue-body:    ${{ github.event.issue.body }}
-
-      # 5) 디버깅: jiraKey 출력
-      - name: Log parsed Jira Key
-        run: |
-          echo "▶ jiraKey = '${{ steps.issue-parser.outputs.issueparser_jiraKey }}'"
-
-      # 6) 자식 이슈를 완료 처리
       - name: Transition Jira issue to 완료
-        if: ${{ steps.issue-parser.outputs.issueparser_jiraKey != '' }}
         uses: atlassian/gajira-transition@v3
         with:
-          issue:        ${{ steps.issue-parser.outputs.issueparser_jiraKey }}
-          transitionId: '31'   # “완료(Done)” 트랜지션 ID
+          issue:        ${{ env.JIRA_KEY }}
+          transitionId: '31'
