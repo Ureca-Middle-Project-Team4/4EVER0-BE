@@ -3,11 +3,28 @@ description: '새로운 기능을 제안하기 위한 양식입니다. 생성된
 labels: [enhancement]
 title: '[FEAT] 이슈 이름을 작성해주세요'
 body:
+  - type: dropdown
+    id: issuetype
+    attributes:
+      label: '🔖 이슈 유형 (Jira Issue Type)'
+      description: 'Jira 상에서 사용할 이슈 타입을 선택해주세요'
+      options:
+        - label: Task
+          value: Task
+        - label: Sub-task
+          value: Sub-task
+        - label: Story
+          value: Story
+        - label: Epic
+          value: Epic
+    validations:
+      required: true
+
   - type: input
     id: parentKey
     attributes:
       label: '🎟️ 상위 작업 (Ticket Number)'
-      description: '연동할 상위 Jira 티켓 키(PRJ-00) 를 입력해주세요'
+      description: '연결할 상위 Jira 티켓 키(PRJ-00) 를 입력해주세요'
       placeholder: 'PRJ-00'
     validations:
       required: true
