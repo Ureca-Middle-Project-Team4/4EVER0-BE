@@ -76,22 +76,18 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: EVER
-
-          # issuetype 필드에는 ‘value’만 뽑아서 전달
-          issuetype: ${{ fromJson( steps.issue-parser.outputs.issueparser_issuetype ).value }}
-
+          issuetype: ${{ steps.issue-parser.outputs.issueparser_issuetype }}
           summary:     '${{ github.event.issue.title }}'
           description: '${{ steps.md2jira.outputs.output-text }}'
 
-          # parentKey가 빈 문자열("")이 아니면 parent 필드 포함
-          ${{- if ne( steps.issue-parser.outputs.issueparser_parentKey, '' ) }}:
-            fields: |
-              {
-                "parent": {
-                  "key": "${{ steps.issue-parser.outputs.issueparser_parentKey }}"
-                }
-              }
-          ${{- end }}
+          # fields: 항상 문자열(string) 타입으로 전달합니다.
+          # parentKey가 빈 문자열이면 '' (빈 문자열),
+          # 아니면 JSON 문자열 '{ "parent": { "key": "<parentKey>" } }' 를 넣습니다.
+          fields: '${{ 
+            steps.issue-parser.outputs.issueparser_parentKey == "" &&
+            "" ||
+            format("{ \"parent\": { \"key\": \"%s\" } }", steps.issue-parser.outputs.issueparser_parentKey)
+          }}'
 
       # 9) 생성된 Jira 키 디버그 로그
       - name: Log created issue
