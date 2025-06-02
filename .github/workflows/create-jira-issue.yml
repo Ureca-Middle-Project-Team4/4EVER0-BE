@@ -73,7 +73,7 @@ jobs:
       # 8-a) parentKey가 존재할 경우만 fields 전달
       - name: Create Issue with parent
         if: ${{ steps.issue-parser.outputs.issueparser_parentKey != '' }}
-        id: create
+        id: create-with-parent
         uses: atlassian/gajira-create@v3
         with:
           project: EVER
@@ -88,7 +88,7 @@ jobs:
       # 8-b) parentKey가 비어있을 경우 fields 생략
       - name: Create Issue without parent
         if: ${{ steps.issue-parser.outputs.issueparser_parentKey == '' }}
-        id: create
+        id: create-without-parent
         uses: atlassian/gajira-create@v3
         with:
           project: EVER
