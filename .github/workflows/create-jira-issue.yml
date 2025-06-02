@@ -45,6 +45,7 @@ jobs:
 
       - name: Log Issue Parser
         run: |
+          echo '${{ steps.issue-parser.outputs.issueparser_issuetype }}'
           echo '${{ steps.issue-parser.outputs.issueparser_parentKey }}'
           echo '${{ steps.issue-parser.outputs.__ticket_number }}'
           echo '${{ steps.issue-parser.outputs.jsonString }}'
@@ -65,7 +66,7 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: EVER
-          issuetype: Task
+          issuetype: ${{ steps.issue-parser.outputs.issueparser_issuetype }}
           summary: '${{ github.event.issue.title }}'
           description: '${{ steps.md2jira.outputs.output-text }}'
           fields: |
