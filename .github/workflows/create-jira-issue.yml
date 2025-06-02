@@ -104,3 +104,11 @@ jobs:
           token:        ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body:        'Jira Issue Created: [${{ env.ISSUE_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ env.ISSUE_KEY }})'
+
+      - name: Add Jira issue key for Close step to parse
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions:      'create-comment'
+          token:        ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body:         'jiraKey: ${{ env.ISSUE_KEY }}'
