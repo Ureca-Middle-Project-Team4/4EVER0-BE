@@ -9,14 +9,10 @@ body:
       label: '🔖 이슈 유형 (Jira Issue Type)'
       description: 'Jira 상에서 사용할 이슈 타입을 선택해주세요'
       options:
-        - label: Task
-          value: Task
-        - label: Sub-task
-          value: Sub-task
-        - label: Story
-          value: Story
-        - label: Epic
-          value: Epic
+        - Task
+        - Sub-task
+        - Story
+        - Epic
     validations:
       required: true
 
