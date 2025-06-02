@@ -1,23 +1,20 @@
 name: Close Jira issue
 on:
   issues:
-    types:
-      - closed
+    types: [closed]
 
 jobs:
   close-issue:
-    name: Close Jira issue
+    name: Close linked Jira issue
     runs-on: ubuntu-latest
 
     steps:
-      # 1) main 브랜치 체크아웃 → 템플릿이 있는 브랜치
-      - name: Checkout main branch
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
 
-      # 2) Jira 로그인
       - name: Login to Jira
         uses: atlassian/gajira-login@v3
         env:
@@ -25,34 +22,26 @@ jobs:
           JIRA_API_TOKEN:  ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      # 3) 이슈 제목이 [BUG]인지 아닌지를 보고 템플릿 선택
-      - name: Select Issue-Form Template
-        id: select-template
-        run: |
-          TITLE="${{ github.event.issue.title }}"
-          if [[ "$TITLE" == "[BUG]"* ]]; then
-            echo "template_path=.github/ISSUE_TEMPLATE/bug-report-form.yml" >> $GITHUB_OUTPUT
-          else
-            echo "template_path=.github/ISSUE_TEMPLATE/feature-request-form.yml" >> $GITHUB_OUTPUT
-          fi
+      # 조건 분기로 템플릿 분리 - run 제거
+      - name: Use BUG template
+        if: startsWith(github.event.issue.title, '[BUG]')
+        id: select-bug
+        run: echo "template_path=.github/ISSUE_TEMPLATE/bug-report-form.yml" >> $GITHUB_OUTPUT
 
-      # 4) Issue Parser (Close에서도 parentKey만 뽑아내면 된다)
-      - name: Issue Parser
+      - name: Use FEATURE template
+        if: ${{ !startsWith(github.event.issue.title, '[BUG]') }}
+        id: select-feature
+        run: echo "template_path=.github/ISSUE_TEMPLATE/feature-request-form.yml" >> $GITHUB_OUTPUT
+
+      - name: Parse GitHub Issue
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: ${{ steps.select-template.outputs.template_path }}
+          template-path: ${{ steps.select-bug.outputs.template_path || steps.select-feature.outputs.template_path }}
           issue-body:    ${{ github.event.issue.body }}
 
-      # 5) parentKey 디버그 로그
-      - name: Log parsed parentKey
-        run: |
-          echo "▶ PARENT_KEY='${{ steps.issue-parser.outputs.issueparser_parentKey }}'"
-
-      # 6) Close Jira issue (parentKey가 있을 때만 실행)
-      - name: Close Jira issue
-        if: ${{ steps.issue-parser.outputs.issueparser_parentKey != '' }}
+      - name: Transition Jira issue to 완료
         uses: atlassian/gajira-transition@v3
         with:
-          issue:         ${{ steps.issue-parser.outputs.issueparser_parentKey }}
-          transitionId:  '31'   # 예: “완료(Done)” 트랜지션 ID
+          issue:        ${{ steps.issue-parser.outputs.issueparser_jiraKey }}
+          transitionId: '31'
