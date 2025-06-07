@@ -1,5 +1,6 @@
 package com.team4ever.backend.global.response;
 
+import com.team4ever.backend.domain.ubti.dto.UBTIResult;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,9 @@ public class BaseResponse<T> {
 		return new BaseResponse<>(200, "요청 성공", data);
 	}
 
-	public static BaseResponse<?> error(ErrorCode errorCode) {
+	// 제네릭 메서드로 변경
+	public static <T> BaseResponse<T> error(ErrorCode errorCode) {
 		return new BaseResponse<>(errorCode.getStatus().value(), errorCode.getMessage(), null);
 	}
 }
+
