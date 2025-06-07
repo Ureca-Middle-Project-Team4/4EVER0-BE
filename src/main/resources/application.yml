@@ -37,8 +37,14 @@ springdoc:
     display-request-duration: true
 
 fastapi:
-  recommend:
+  chat:
     host: ${FASTAPI_HOST:localhost}
     port: ${FASTAPI_PORT:8000}
-    path: /api/multi-recommend
+    path: /api/chat
+  ubti:
+    host: ${FASTAPI_HOST:localhost}
+    port: ${FASTAPI_PORT:8000}
+    path:
+      question: /api/ubti/question
+      result:   /api/ubti/result
 
