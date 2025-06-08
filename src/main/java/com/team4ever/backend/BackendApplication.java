@@ -6,15 +6,47 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 public class BackendApplication {
-
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.configure().load();
 
 		System.setProperty("SPRING_DATASOURCE_URL", dotenv.get("SPRING_DATASOURCE_URL"));
 		System.setProperty("SPRING_DATASOURCE_USERNAME", dotenv.get("SPRING_DATASOURCE_USERNAME"));
 		System.setProperty("SPRING_DATASOURCE_PASSWORD", dotenv.get("SPRING_DATASOURCE_PASSWORD"));
-		System.setProperty("SPRING_REDIS_HOST", dotenv.get("SPRING_REDIS_HOST"));
-		System.setProperty("SPRING_REDIS_PORT", dotenv.get("SPRING_REDIS_PORT"));
+
+		System.setProperty("SPRING_DATA_REDIS_HOST", dotenv.get("SPRING_DATA_REDIS_HOST"));
+		System.setProperty("SPRING_DATA_REDIS_PORT", dotenv.get("SPRING_DATA_REDIS_PORT"));
+
+		System.setProperty("APP_AUTH_TOKEN_SECRET", dotenv.get("APP_AUTH_TOKEN_SECRET"));
+		System.setProperty("APP_AUTH_ACCESS_TOKEN_EXPIRATION_MSEC", dotenv.get("APP_AUTH_ACCESS_TOKEN_EXPIRATION_MSEC"));
+		System.setProperty("APP_AUTH_REFRESH_TOKEN_EXPIRATION_MSEC", dotenv.get("APP_AUTH_REFRESH_TOKEN_EXPIRATION_MSEC"));
+
+		// --- OAuth2 클라이언트 (Google, Kakao, Naver) ---
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID")
+		);
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET")
+		);
+
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_ID",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_ID")
+		);
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_SECRET",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_SECRET")
+		);
+
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_ID",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_ID")
+		);
+		System.setProperty(
+				"SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_SECRET",
+				dotenv.get("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT_SECRET")
+		);
 
 		SpringApplication.run(BackendApplication.class, args);
 	}
