@@ -1,16 +1,15 @@
 package com.team4ever.backend.domain.coupon.dto;
 
+import com.team4ever.backend.domain.coupon.entity.Coupon;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.team4ever.backend.domain.coupon.entity.Coupon;
-
 
 import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
 public class CouponResponse {
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
     private String brand;
@@ -20,16 +19,16 @@ public class CouponResponse {
     private LocalDate endDate;
     private Boolean isUsed;
 
-    public static CouponResponse from(Coupon coupon, Boolean used) {
+    public static CouponResponse from(Coupon c, boolean used) {
         return new CouponResponse(
-                coupon.getId(),
-                coupon.getTitle(),
-                coupon.getDescription(),
-                coupon.getBrand(),
-                coupon.getDiscountType().name(),
-                coupon.getDiscountValue(),
-                coupon.getStartDate(),
-                coupon.getEndDate(),
+                c.getId(),
+                c.getTitle(),
+                c.getDescription(),
+                c.getBrand().getName(),
+                c.getDiscountType().name(),
+                c.getDiscountValue(),
+                c.getStartDate(),
+                c.getEndDate(),
                 used
         );
     }

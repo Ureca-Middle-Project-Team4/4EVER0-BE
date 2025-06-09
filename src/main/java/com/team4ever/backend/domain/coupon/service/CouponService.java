@@ -1,20 +1,20 @@
 package com.team4ever.backend.domain.coupon.service;
 
-import java.util.Map;
-import java.util.stream.Collectors;
 import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
-import com.team4ever.backend.domain.coupon.entity.Coupon;
 import com.team4ever.backend.domain.coupon.entity.UserCoupon;
 import com.team4ever.backend.domain.coupon.repository.CouponRepository;
 import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
-
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,33 +23,46 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
 
-
-    public List<CouponResponse> getAllCoupons() {
-        List<Coupon> coupons = couponRepository.findAll();
-
-        return coupons.stream()
-                .map(c -> CouponResponse.from(c, null)) // user 없이 used 정보는 null 처리
+    @Transactional(readOnly = true)
+    public List<CouponResponse> getAllCoupons(Integer userId) {
+        LocalDate today = LocalDate.now();
+        return couponRepository.findAllValid(today).stream()
+                .map(c -> {
+                    boolean used = userCouponRepository
+                            .findByUserIdAndCouponId(userId, c.getId())
+                            .map(UserCoupon::getIsUsed)
+                            .orElse(false);
+                    return CouponResponse.from(c, used);
+                })
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public CouponClaimResponse claimCoupon(Integer userId, Integer couponId) {
+        var coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
-    public CouponClaimResponse claimCoupon(Long couponId, Long userId) {
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new RuntimeException("쿠폰 없음"));
+        LocalDate today = LocalDate.now();
+        if (today.isBefore(coupon.getStartDate()) || today.isAfter(coupon.getEndDate())) {
+            throw new CustomException(ErrorCode.COUPON_EXPIRED);
+        }
+        if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
+            throw new CustomException(ErrorCode.COUPON_ALREADY_CLAIMED);
+        }
 
-        userCouponRepository.findByUserIdAndCouponId(userId, couponId)
-                .orElseGet(() -> userCouponRepository.save(new UserCoupon(null, userId, coupon, false)));
-
-        return new CouponClaimResponse(couponId, "성공");
+        UserCoupon uc = UserCoupon.of(userId, coupon);
+        userCouponRepository.save(uc);
+        return CouponClaimResponse.from(uc);
     }
 
-    public CouponUseResponse useCoupon(Long couponId, Long userId) {
-        UserCoupon userCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId)
-                .orElseThrow(() -> new RuntimeException("쿠폰 미발급"));
-
-        userCoupon.setIsUsed(true);
-        userCouponRepository.save(userCoupon);
-
-        return new CouponUseResponse(couponId, true);
+    @Transactional
+    public CouponUseResponse useCoupon(Integer userId, Integer couponId) {
+        UserCoupon uc = userCouponRepository.findByUserIdAndCouponId(userId, couponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_CLAIMED));
+        if (uc.getIsUsed()) {
+            throw new CustomException(ErrorCode.COUPON_ALREADY_USED);
+        }
+        uc.markAsUsed();
+        return CouponUseResponse.from(uc);
     }
 }

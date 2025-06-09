@@ -7,6 +7,8 @@ import com.team4ever.backend.domain.coupon.service.CouponService;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,26 +22,49 @@ public class CouponController {
 
     @Operation(summary = "전체 쿠폰 조회")
     @GetMapping("")
-    public BaseResponse<List<CouponResponse>> getAllCoupons() {
-        return BaseResponse.success(couponService.getAllCoupons());
+    public BaseResponse<List<CouponResponse>> getAllCoupons(
+            @AuthenticationPrincipal OAuth2User oauth2User
+    ) {
+        Integer userId = extractUserId(oauth2User);
+        return BaseResponse.success(
+                couponService.getAllCoupons(userId)
+        );
     }
 
-
     @Operation(summary = "특정 쿠폰 발급 요청")
-    @GetMapping("/{couponId}/claim")
+    @PostMapping("/{couponId}/claim")
     public BaseResponse<CouponClaimResponse> claimCoupon(
-            @PathVariable Long couponId,
-            @RequestParam Long userId // 🔁 인증 제거
+            @PathVariable Integer couponId,
+            @AuthenticationPrincipal OAuth2User oauth2User
     ) {
-        return BaseResponse.success(couponService.claimCoupon(userId, couponId));
+        Integer userId = extractUserId(oauth2User);
+        return BaseResponse.success(
+                couponService.claimCoupon(userId, couponId)
+        );
     }
 
     @Operation(summary = "특정 쿠폰 사용 처리")
     @PatchMapping("/{couponId}/use")
     public BaseResponse<CouponUseResponse> useCoupon(
-            @PathVariable Long couponId,
-            @RequestParam Long userId // 🔁 인증 제거
+            @PathVariable Integer couponId,
+            @AuthenticationPrincipal OAuth2User oauth2User
     ) {
-        return BaseResponse.success(couponService.useCoupon(userId, couponId));
+        Integer userId = extractUserId(oauth2User);
+        return BaseResponse.success(
+                couponService.useCoupon(userId, couponId)
+        );
+    }
+
+    private Integer extractUserId(OAuth2User oauth2User) {
+        // CustomOAuth2UserService에서 "id" 속성으로 매핑해 준 값을 꺼냅니다.
+        Object idAttr = oauth2User.getAttribute("id");
+        if (idAttr == null) {
+            throw new IllegalStateException("OAuth2User에 'id' 속성이 없습니다.");
+        }
+        try {
+            return Integer.valueOf(idAttr.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("'id' 속성의 형식이 올바르지 않습니다: " + idAttr);
+        }
     }
 }

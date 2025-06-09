@@ -7,10 +7,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CouponClaimResponse {
-    private Long couponId;
-    private String message;
+    private Integer couponId;
 
     public static CouponClaimResponse from(UserCoupon uc) {
-        return new CouponClaimResponse(uc.getCoupon().getId(), "쿠폰이 성공적으로 발급되었습니다.");
+        return new CouponClaimResponse(uc.getCoupon().getId());
     }
 }

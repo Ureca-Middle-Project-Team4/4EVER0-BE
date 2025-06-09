@@ -7,11 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserCouponRepository extends JpaRepository<UserCoupon, Long> {
-
-    Optional<UserCoupon> findByUserIdAndCouponId(Long userId, Long couponId);
-
-    // 🔁 userId 기준 제거하고 전체 조회만 남김
+public interface UserCouponRepository extends JpaRepository<UserCoupon, Integer> {
+    // 사용자+쿠폰 단건 조회 (사용 상태 확인)
     @EntityGraph(attributePaths = "coupon")
-    List<UserCoupon> findAll();
+    Optional<UserCoupon> findByUserIdAndCouponId(Integer userId, Integer couponId);
+
+    boolean existsByUserIdAndCouponId(Integer userId, Integer couponId);
+
+    // 사용자별 전체 쿠폰 조회 (isUsed 상태 확인)
+    @EntityGraph(attributePaths = "coupon")
+    List<UserCoupon> findByUserId(Integer userId);
 }

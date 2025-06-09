@@ -1,20 +1,24 @@
 package com.team4ever.backend.domain.coupon.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
+import com.team4ever.backend.domain.coupon.dto.Brand;
 
 @Entity
 @Table(name = "coupons")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Coupon {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED COMMENT '쿠폰 PK'")
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", nullable = false)
+    private Brand brand;
 
     private String title;
     private String description;
@@ -27,7 +31,16 @@ public class Coupon {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    private String brand; // 브랜드 이름을 단순화
+    @Column(nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+
+    @Column(nullable = false)
+    private java.time.LocalDateTime updatedAt = java.time.LocalDateTime.now();
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = java.time.LocalDateTime.now();
+    }
 
     public enum DiscountType {
         PERCENT, FIXED
