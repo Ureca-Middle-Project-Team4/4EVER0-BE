@@ -1,4 +1,17 @@
+# src/test/resources/application-test.yml
+
+# ——————————————
+# 1) 기본 Spring 설정
+# ——————————————
 spring:
+  config:
+    # dotenv 는 테스트에서 필요 없으므로 주석 처리하거나 optional 로 둡니다
+    import: "optional:dotenv"
+
+  thymeleaf:
+    cache: false
+
+  # 실제 애플리케이션의 MySQL 대신 H2 인메모리로 대체
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
@@ -12,11 +25,104 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
 
   sql:
     init:
       mode: never
 
+  # Redis 는 사용하지 않는다면 더미값
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 6000ms
+      lettuce:
+        shutdown-timeout: 100ms
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 3000ms
+
+  # OAuth2 Client 더미값
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy-google-id
+            client-secret: dummy-google-secret
+            provider: google
+            authorization-grant-type: authorization_code
+            redirect-uri: "{app.baseUrl}/login/oauth2/code/google"
+            scope: openid, profile, email
+          kakao:
+            client-id: dummy-kakao-id
+            client-secret: dummy-kakao-secret
+            provider: kakao
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: "{app.baseUrl}/login/oauth2/code/kakao"
+            scope: profile_image, profile_nickname, account_email
+          naver:
+            client-id: dummy-naver-id
+            client-secret: dummy-naver-secret
+            provider: naver
+            authorization-grant-type: authorization_code
+            redirect-uri: "{app.baseUrl}/login/oauth2/code/naver"
+            scope: name, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
+            user-name-attribute: sub
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+          naver:
+            authorization-uri: https://nid.naver.com/oauth2.0/authorize
+            token-uri: https://nid.naver.com/oauth2.0/token
+            user-info-uri: https://openapi.naver.com/v1/nid/me
+            user-name-attribute: response
+
+# ——————————————
+# 2) 애플리케이션 전역 변수 더미값
+# ——————————————
+app:
+  auth:
+    tokenSecret: dummy-test-secret
+    accessTokenExpirationMsec: 3600000
+    refreshTokenExpirationMsec: 86400000
+  baseUrl: http://localhost:5050
+
+server:
+  port: 5050
+
+# ——————————————
+# 3) OpenAPI, FastAPI 더미
+# ——————————————
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true
+
+fastapi:
+  recommend:
+    host: localhost
+    port: 8000
+    path: /api/multi-recommend
+
+# ——————————————
+# 4) 로깅 (필요시)
+# ——————————————
 logging:
   level:
     org.hibernate.SQL: debug

@@ -1,13 +1,11 @@
 package com.team4ever.backend.domain.chat.service;
 
-import com.team4ever.backend.domain.chat.dto.ChatLikesResponse;
 import com.team4ever.backend.domain.chat.dto.ChatRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class ChatService {
