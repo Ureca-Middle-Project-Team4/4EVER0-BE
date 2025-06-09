@@ -21,13 +21,11 @@ public class CouponController {
     private final CouponService couponService;
 
     @Operation(summary = "전체 쿠폰 조회")
-    @GetMapping("")
-    public BaseResponse<List<CouponResponse>> getAllCoupons(
-            @AuthenticationPrincipal OAuth2User oauth2User
-    ) {
-        Integer userId = extractUserId(oauth2User);
+    @GetMapping
+    public BaseResponse<List<CouponResponse>> getAllCoupons() {
+        // userId 없이 전체 쿠폰만 반환
         return BaseResponse.success(
-                couponService.getAllCoupons(userId)
+                couponService.getAllCoupons(null)
         );
     }
 

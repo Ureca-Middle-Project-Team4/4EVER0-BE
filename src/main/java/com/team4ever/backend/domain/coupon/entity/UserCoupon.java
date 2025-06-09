@@ -31,22 +31,15 @@ public class UserCoupon {
 
     private Boolean isUsed = false;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime claimedAt = LocalDateTime.now();
-
-    private LocalDateTime usedAt;
-
     public static UserCoupon of(Integer userId, Coupon coupon) {
         UserCoupon uc = new UserCoupon();
         uc.userId = userId;
         uc.coupon = coupon;
         uc.isUsed = false;
-        uc.claimedAt = LocalDateTime.now();
         return uc;
     }
 
     public void markAsUsed() {
         this.isUsed = true;
-        this.usedAt = LocalDateTime.now();
     }
 }
