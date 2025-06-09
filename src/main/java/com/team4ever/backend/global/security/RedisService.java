@@ -31,6 +31,6 @@ public class RedisService {
 
     public void deleteRefreshToken(String userId) {
         System.out.println("[RedisService] deleteRefreshToken 호출 userId=" + userId);
-        ops.getOperations().delete(REFRESH_KEY_PREFIX + userId);
+        ops.getOperations().delete(userId);
     }
 }
