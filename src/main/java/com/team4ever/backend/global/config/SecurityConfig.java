@@ -3,6 +3,7 @@ package com.team4ever.backend.global.config;
 
 import com.team4ever.backend.global.security.CustomOAuth2SuccessHandler;
 import com.team4ever.backend.global.security.CustomOAuth2UserService;
+import com.team4ever.backend.global.security.RedisService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,16 +18,20 @@ public class SecurityConfig {
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRepo;
     private final CustomOAuth2UserService customUserService;
     private final CustomOAuth2SuccessHandler successHandler;
+    private final RedisService redisService;
 
     // ↓ RedisTemplate 대신 AuthorizationRequestRepository 를 주입받도록 변경
     public SecurityConfig(
             AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRepo,
             CustomOAuth2UserService customUserService,
-            CustomOAuth2SuccessHandler successHandler
+            CustomOAuth2SuccessHandler successHandler,
+            RedisService redisService
     ) {
         this.authorizationRepo = authorizationRepo;
         this.customUserService = customUserService;
         this.successHandler    = successHandler;
+        this.redisService      = redisService;
+
     }
 
     @Bean
@@ -66,7 +71,13 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")                      // 클라이언트가 호출할 로그아웃 URL
                         .invalidateHttpSession(true)
-                        .deleteCookies("ACCESS_TOKEN", "JSESSIONID")    // 필요하다면 쿠키 이름들
+                        .deleteCookies("ACCESS_TOKEN", "JSESSIONID")
+                        .addLogoutHandler((request, response, authentication) -> {
+                            if (authentication != null && authentication.getName() != null) {
+                                redisService.deleteRefreshToken(authentication.getName());
+                            }
+                        })
+                        // 필요하다면 쿠키 이름들
                         .logoutSuccessHandler((req, res, auth) -> {
                             res.setStatus(HttpServletResponse.SC_OK);
                             // JSON 응답이 필요하면 작성하거나, redirect 하려면
