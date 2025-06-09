@@ -36,10 +36,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
-                                "/login/**",       // ← 여기를 조금 넓게 잡습니다.
+                                "/login/**",
                                 "/oauth2/**",
                                 "/css/**",
-                                "/auth/**"
+                                "/auth/**",
+
+                                // ↓ Swagger
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

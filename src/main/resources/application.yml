@@ -98,16 +98,24 @@ logging:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
+    url: /v3/api-docs
     path: /swagger-ui.html
     operationsSorter: method
     tagsSorter: alpha
     display-request-duration: true
 
+
 fastapi:
-  recommend:
+  chat:
     host: ${FASTAPI_HOST:localhost}
     port: ${FASTAPI_PORT:8000}
-    path: /api/multi-recommend
+    path: /api/chat
+  ubti:
+    host: ${FASTAPI_HOST:localhost}
+    port: ${FASTAPI_PORT:8000}
+    path:
+      question: /api/ubti/question
+      result:   /api/ubti/result
 
