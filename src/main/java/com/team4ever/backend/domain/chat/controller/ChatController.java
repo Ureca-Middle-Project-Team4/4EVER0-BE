@@ -71,7 +71,7 @@ public class ChatController {
 	)
 	public Flux<String> chatLikes(@RequestBody ChatLikesRequest req) {
 		ChatRequest request = new ChatRequest();
-		request.setSession_id(req.getSession_id());
+		request.setSessionId(req.getSessionId());
 		request.setMessage("likes"); // 명시적으로 likes intent 전달
 		return chatService.getChatLikesResponse(request);
 	}
