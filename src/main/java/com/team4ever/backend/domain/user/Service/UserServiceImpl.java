@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
-
+    private static final int DEFAULT_PLAN_ID = 0;
     private final UserRepository repo;
 
     public UserServiceImpl(UserRepository repo) {
@@ -23,6 +23,10 @@ public class UserServiceImpl implements UserService {
             //Exception 나중에 정의해서 바꾸기
             throw new IllegalArgumentException("이미 존재하는 userId 입니다.");
         }
+
+        Integer planId = req.getPlanId() != null
+                ? req.getPlanId()
+                : DEFAULT_PLAN_ID;
         User u = User.builder()
                 .planId(req.getPlanId())
                 .userId(req.getUserId())

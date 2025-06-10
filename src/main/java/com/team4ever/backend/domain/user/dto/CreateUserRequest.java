@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class CreateUserRequest {
-    @NotNull
     private Integer planId;
 
     @NotBlank
