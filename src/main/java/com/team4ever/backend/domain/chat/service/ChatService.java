@@ -11,26 +11,36 @@ import reactor.core.publisher.Flux;
 public class ChatService {
 
 	private final WebClient webClient;
-	private final String path;
+	private final String chatPath;
+	private final String likesPath;
 
 	public ChatService(
 			@Value("${fastapi.chat.host}") String host,
 			@Value("${fastapi.chat.port}") int port,
-			@Value("${fastapi.chat.path}") String path
+			@Value("${fastapi.chat.path}") String chatPath,
+			@Value("${fastapi.chat.likes}") String likesPath
 	) {
 		this.webClient = WebClient.builder()
 				.baseUrl(String.format("http://%s:%d", host, port))
 				.build();
-		this.path = path;
+		this.chatPath = chatPath;
+		this.likesPath = likesPath;
 	}
 
-	/**
-	 * FastAPI의 /api/chat 에서 NDJSON 스트림으로 내려오는
-	 * JSON 라인(문자열)을 그대로 Flux<String>으로 받아옵니다.
-	 */
+	// 일반 챗 스트리밍
 	public Flux<String> getChatResponse(ChatRequest request) {
 		return webClient.post()
-				.uri(path)
+				.uri(chatPath)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(request)
+				.retrieve()
+				.bodyToFlux(String.class);
+	}
+
+	// 좋아요 기반 추천 스트리밍
+	public Flux<String> getChatLikesResponse(ChatRequest request) {
+		return webClient.post()
+				.uri(likesPath)
 				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(request)
 				.retrieve()

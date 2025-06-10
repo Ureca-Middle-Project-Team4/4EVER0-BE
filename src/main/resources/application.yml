@@ -112,6 +112,7 @@ fastapi:
     host: ${FASTAPI_HOST:localhost}
     port: ${FASTAPI_PORT:8000}
     path: /api/chat
+    likes: /api/chat/likes
   ubti:
     host: ${FASTAPI_HOST:localhost}
     port: ${FASTAPI_PORT:8000}

@@ -5,6 +5,7 @@ import com.team4ever.backend.domain.chat.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import com.team4ever.backend.domain.chat.dto.ChatLikesRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +17,6 @@ import reactor.core.publisher.Flux;
 public class ChatController {
 
 	private final ChatService chatService;
-
-	@Operation(
-			summary = "Chat streaming as plain text",
-			responses = {
-					@ApiResponse(
-							responseCode = "200",
-							description = "각 청크를 문자열로 스트리밍합니다.",
-							content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)
-					)
-			}
-	)
 
 	/**
 	 * 채팅 스트리밍 엔드포인트
@@ -45,6 +35,17 @@ public class ChatController {
 	 *     // 각 청크(chunk)마다 처리 로직 작성
 	 * });
 	 */
+
+	@Operation(
+			summary = "Chat streaming as plain text",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "각 청크를 문자열로 스트리밍합니다.",
+							content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)
+					)
+			}
+	)
 	@PostMapping(
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.TEXT_PLAIN_VALUE
@@ -52,4 +53,29 @@ public class ChatController {
 	public Flux<String> chat(@RequestBody ChatRequest req) {
 		return chatService.getChatResponse(req);
 	}
+
+	@Operation(
+			summary = "Chat likes-based recommendation streaming",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "좋아요 기반 추천 결과를 스트리밍합니다.",
+							content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE)
+					)
+			}
+	)
+	@PostMapping(
+			value = "/likes",
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.TEXT_PLAIN_VALUE
+	)
+	public Flux<String> chatLikes(@RequestBody ChatLikesRequest req) {
+		ChatRequest request = new ChatRequest();
+		request.setSessionId(req.getSessionId());
+		request.setMessage("likes"); // 명시적으로 likes intent 전달
+		return chatService.getChatLikesResponse(request);
+	}
 }
+
+
+
