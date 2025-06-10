@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class JwtTokenController {
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;

@@ -2,6 +2,7 @@ package com.team4ever.backend.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,6 +22,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //         .addResourceLocations("classpath:/static/css/");
     }
 
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        // 모든 /auth/** 는 컨트롤러/시큐리티로 넘기도록
+        configurer.addPathPrefix("", c ->
+                !c.getPackageName().startsWith("org.springframework.web.servlet.resource"));
+    }
     /**
      * 3) 인터셉터(Interceptor) 등록
      *    예시: MyInterceptor 를 /api/** 경로에 걸고 싶을 때
