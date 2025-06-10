@@ -20,4 +20,21 @@ public class MissionController {
         List<MissionDto> missions = missionService.getAllMissions();
         return BaseResponse.success(missions);
     }
+
+    @PatchMapping("/{missionId}/progress")
+    public BaseResponse<String> updateProgress(@PathVariable Long missionId,
+                                               @RequestParam Integer userId) {
+        String result = missionService.updateMissionProgress(userId, missionId);
+        return BaseResponse.success(result);
+    }
+
+    // User 패키지 생성 후 다시 보기
+//    @PatchMapping("/{missionId}/reward")
+//    public BaseResponse<String> receiveReward(@PathVariable Long missionId,
+//                                              @RequestParam Integer userId) {
+//        String result = missionService.receiveMissionReward(userId, missionId);
+//        return BaseResponse.success(result);
+//    }
+
+
 }
