@@ -21,7 +21,7 @@ public class AttendanceService {
     @Transactional
     public AttendanceDto checkToday(Long userId) {
         LocalDate today = LocalDate.now();
-        boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today);
+        boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today); // 중복방지
         if (exists) {
             throw new CustomException(ErrorCode.ALREADY_CHECKED);
         }
