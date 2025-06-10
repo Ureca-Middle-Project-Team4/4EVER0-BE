@@ -1,19 +1,23 @@
 package com.team4ever.backend.domain.mission.dto;
 
 import com.team4ever.backend.domain.mission.entity.Mission;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
-public record MissionDto(
-        Long id,
-        String name,
-        String description,
-        String type,
-        int targetCount,
-        int rewardPoint,
-        LocalDate completedAt,
-        String imageUrl
-) {
+@Getter
+@AllArgsConstructor
+public class MissionDto {
+    private Long id;
+    private String name;
+    private String description;
+    private String type;
+    private int targetCount;
+    private int rewardPoint;
+    private LocalDate completedAt;
+    private String imageUrl;
+
     public static MissionDto from(Mission mission) {
         return new MissionDto(
                 mission.getId(),
