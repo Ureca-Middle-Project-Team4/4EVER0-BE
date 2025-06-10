@@ -3,6 +3,8 @@ package com.team4ever.backend.domain.attendance.service;
 import com.team4ever.backend.domain.attendance.entity.Attendance;
 import com.team4ever.backend.domain.attendance.dto.AttendanceDto;
 import com.team4ever.backend.domain.attendance.repository.AttendanceRepository;
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +20,8 @@ public class AttendanceService {
     public AttendanceDto checkToday(Long userId) {
         LocalDate today = LocalDate.now();
         boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today);
-        if(exists) {
-            throw new RuntimeException("이미 출석했습니다.");
+        if (attendanceRepository.existsByUserIdAndCheckedDate(userId, today)) {
+            throw new CustomException(ErrorCode.ALREADY_CHECKED);
         }
 
         Attendance saved = attendanceRepository.save(new Attendance(userId, today));
