@@ -9,10 +9,6 @@ import java.util.List;
 
 public interface BrandRepository extends JpaRepository<Brand, Integer> {
 	List<Brand> findByCategory(String category);
-
-	// 대소문자 구분 없이 검색
-	List<Brand> findByCategoryIgnoreCase(String category);
-
 	// LIKE 검색 (부분 일치)
 	@Query("SELECT b FROM Brand b WHERE b.category LIKE %:category%")
 	List<Brand> findByCategoryContaining(@Param("category") String category);

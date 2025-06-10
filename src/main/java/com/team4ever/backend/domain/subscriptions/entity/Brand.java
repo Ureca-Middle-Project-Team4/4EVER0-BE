@@ -20,7 +20,7 @@ public class Brand {
 	@Column(nullable = false, columnDefinition = "VARCHAR(50) COMMENT '브랜드 이름'")
 	private String name;
 
-	@Column(name = "image_url", nullable = false, columnDefinition = "TEXT COMMENT '이미지 URL'")// 스네이크 케이스
+	@Column(name = "image_url", nullable = false, columnDefinition = "TEXT COMMENT '이미지 URL'")
 	private String imageUrl;
 
 	@Column(columnDefinition = "TEXT COMMENT '설명'")

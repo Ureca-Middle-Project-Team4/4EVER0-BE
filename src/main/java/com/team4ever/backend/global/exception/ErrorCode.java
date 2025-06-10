@@ -8,6 +8,8 @@ public enum ErrorCode {
 
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+	INVALID_USER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자 ID입니다."),
 
 
 	// 구독 관련 에러

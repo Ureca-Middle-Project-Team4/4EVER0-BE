@@ -10,8 +10,8 @@ public class SubscribeResponse {
 	@JsonProperty("subscription_combination_id")
 	private Integer subscriptionCombinationId;
 
-	@JsonProperty("user_id")
-	private Integer userId;
+	@JsonProperty("brand_id")
+	private Integer brandId;
 
 	private Integer price;
 }
