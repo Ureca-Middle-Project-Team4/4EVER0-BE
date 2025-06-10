@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "popups")
+@Table(name = "popup_stores")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,7 +15,7 @@ public class Popup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "BIGINT UNSIGNED COMMENT '팝업스토어 PK'")
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(255) COMMENT '팝업 이름'")
     private String name;
@@ -36,12 +36,8 @@ public class Popup {
     private String imageUrl;
 
     @Column(columnDefinition = "BIGINT UNSIGNED COMMENT '작성자 ID'", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0 COMMENT '북마크 여부'")
     private Boolean isBookmarked = false;
-
-    public void toggleBookmark() {
-        this.isBookmarked = !this.isBookmarked;
-    }
 }

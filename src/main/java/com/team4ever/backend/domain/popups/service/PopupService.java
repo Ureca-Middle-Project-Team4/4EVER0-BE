@@ -1,60 +1,53 @@
 package com.team4ever.backend.domain.popups.service;
 
 import com.team4ever.backend.domain.popups.dto.PopupResponse;
+import com.team4ever.backend.domain.popups.entity.Popup;
+import com.team4ever.backend.domain.popups.repository.PopupRepository;
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PopupService {
 
+    private final PopupRepository popupRepository;
+
+    /** 전체 조회 */
     public List<PopupResponse> getAllPopups() {
-        return List.of(
-                PopupResponse.builder()
-                        .id(1L)
-                        .name("스타벅스 팝업스토어")
-                        .description("신제품 음료 체험존")
-                        .address("서울 강남구 테헤란로 123")
-                        .latitude(37.5012345)
-                        .longitude(127.0398741)
-                        .imageUrl("https://example.com/store1.jpg")
-                        .build(),
-
-                PopupResponse.builder()
-                        .id(2L)
-                        .name("무신사 팝업스토어")
-                        .description("신상품 런칭 이벤트")
-                        .address("서울 마포구 어딘가로 456")
-                        .latitude(37.5512345)
-                        .longitude(126.9248741)
-                        .imageUrl("https://example.com/store2.jpg")
-                        .build()
-        );
+        return popupRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public PopupResponse getPopupById(Long id) {
-        if (id == 1L) {
-            return PopupResponse.builder()
-                    .id(1L)
-                    .name("스타벅스 팝업스토어")
-                    .description("신제품 음료 체험존")
-                    .address("서울 강남구 테헤란로 123")
-                    .latitude(37.5012345)
-                    .longitude(127.0398741)
-                    .imageUrl("https://example.com/store1.jpg")
-                    .build();
-        } else if (id == 2L) {
-            return PopupResponse.builder()
-                    .id(2L)
-                    .name("무신사 팝업스토어")
-                    .description("신상품 런칭 이벤트")
-                    .address("서울 마포구 어딘가로 456")
-                    .latitude(37.5512345)
-                    .longitude(126.9248741)
-                    .imageUrl("https://example.com/store2.jpg")
-                    .build();
-        } else {
-            throw new IllegalArgumentException("해당 ID의 팝업스토어가 없습니다.");
-        }
+    /** ID로 조회 */
+    public PopupResponse getPopupById(Integer id) {
+        Popup popup = popupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.POPUP_NOT_FOUND));
+        return toResponse(popup);
     }
+
+    private PopupResponse toResponse(Popup popup) {
+        // description의 \n을 공백으로 치환해야 함
+        String cleanedDescription = popup.getDescription() != null
+                ? popup.getDescription().replace("\n", " ")
+                : "";
+
+        return PopupResponse.builder()
+                .id(popup.getId())
+                .name(popup.getName())
+                .description(cleanedDescription)
+                .address(popup.getAddress())
+                .latitude(popup.getLatitude())
+                .longitude(popup.getLongitude())
+                .imageUrl(popup.getImageUrl())
+                .build();
+    }
+
 }
