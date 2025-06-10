@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
@@ -46,7 +48,7 @@ public class SecurityConfig {
 
                         // 2) OAuth 로그인용 엔드포인트
                         .requestMatchers(
-                                "/",
+                                "/**",
                                 "/login/**",
                                 "/oauth2/**",
                                 "/css/**",
@@ -62,6 +64,7 @@ public class SecurityConfig {
 
                         // 🔐 인증이 필요한 API 엔드포인트
                         .requestMatchers("/api/chat/likes").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/coupons/*/claim").permitAll()
 
                         .anyRequest().authenticated()
                 )

@@ -1,5 +1,6 @@
 package com.team4ever.backend.domain.coupon.controller;
 
+import com.team4ever.backend.domain.coupon.dto.CouponClaimRequest;
 import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
@@ -30,16 +31,13 @@ public class CouponController {
     }
 
     @Operation(summary = "특정 쿠폰 발급 요청")
-    @PostMapping("/{couponId}/claim")
-    public BaseResponse<CouponClaimResponse> claimCoupon(
-            @PathVariable Integer couponId,
-            @AuthenticationPrincipal OAuth2User oauth2User
-    ) {
-        Integer userId = extractUserId(oauth2User);
-        return BaseResponse.success(
-                couponService.claimCoupon(userId, couponId)
-        );
+    @PostMapping("/claim")
+    public BaseResponse<CouponClaimResponse> claimCoupon(@RequestBody CouponClaimRequest request) {
+        CouponClaimResponse response = couponService.claimCoupon(request.getUserId(), request.getCouponId());
+        return BaseResponse.success(response);
     }
+
+
 
     @Operation(summary = "특정 쿠폰 사용 처리")
     @PatchMapping("/{couponId}/use")

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
-import com.team4ever.backend.domain.coupon.dto.Brand;
 
 @Entity
 @Table(name = "coupons")

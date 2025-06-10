@@ -1,4 +1,4 @@
-package com.team4ever.backend.domain.coupon.dto;
+package com.team4ever.backend.domain.coupon.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
