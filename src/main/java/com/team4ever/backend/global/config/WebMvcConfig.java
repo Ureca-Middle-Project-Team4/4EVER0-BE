@@ -1,12 +1,31 @@
 package com.team4ever.backend.global.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    /**
+     * 1) UTF-8 인코딩 필터 빈 등록
+     */
+    @Bean
+    public CharacterEncodingFilter characterEncodingFilter() {
+        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
+        return filter;
+    }
+
     /**
      * 2) 정적 리소스(Resource) 핸들러 설정
      *    예시: /images/** 요청은 classpath:/static/images/ 폴더에서 찾기
@@ -32,6 +51,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //         .excludePathPatterns("/api/auth/**");
     }
 
-    // 여기 아래에 addViewControllers, configureMessageConverters 등
+    /**
+     * 4) HTTP 메시지 컨버터 설정 (UTF-8 인코딩)
+     */
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+        converters.add(stringConverter);
+    }
+
+    // 여기 아래에 addViewControllers 등
     // WebMvcConfigurer 에 다른 메서드를 추가해도 됩니다.
 }
