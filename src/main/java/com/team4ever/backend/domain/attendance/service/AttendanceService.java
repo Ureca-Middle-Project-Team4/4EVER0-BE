@@ -7,6 +7,7 @@ import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -17,10 +18,11 @@ import java.util.List;
 public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
 
+    @Transactional
     public AttendanceDto checkToday(Long userId) {
         LocalDate today = LocalDate.now();
         boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today);
-        if (attendanceRepository.existsByUserIdAndCheckedDate(userId, today)) {
+        if (exists) {
             throw new CustomException(ErrorCode.ALREADY_CHECKED);
         }
 
