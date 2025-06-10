@@ -9,6 +9,8 @@ import com.team4ever.backend.domain.subscriptions.repository.BrandRepository;
 import com.team4ever.backend.domain.subscriptions.repository.SubscriptionCombinationRepository;
 import com.team4ever.backend.domain.subscriptions.repository.SubscriptionRepository;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
+import com.team4ever.backend.domain.user.Entity.User;
+import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class SubscriptionService {
 	private final BrandRepository brandRepository;
 	private final SubscriptionCombinationRepository subscriptionCombinationRepository;
 	private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
+	private final UserRepository userRepository;
 
 	public List<SubscriptionResponse> getMainSubscriptions() {
 		return subscriptionRepository.findAll().stream()
@@ -77,14 +80,11 @@ public class SubscriptionService {
 						return new CustomException(ErrorCode.BRAND_NOT_FOUND);
 					});
 
-			Integer userId;
-			try {
-				userId = Integer.valueOf(getCurrentUserId());
-				log.info("현재 사용자 ID (Integer): {}", userId);
-			} catch (NumberFormatException e) {
-				log.error("Principal.getName()에서 가져온 사용자 ID '{}'를 Integer로 변환할 수 없습니다. CustomOAuth2UserService의 설정 또는 User 엔티티의 ID 타입이 올바른지 확인하세요.", getCurrentUserId(), e);
-				throw new CustomException(ErrorCode.INVALID_USER_ID);
-			}
+			// User 도메인을 통해 사용자 정보 조회
+			User currentUser = getCurrentUser();
+			Long userIdLong = currentUser.getId();
+			Integer userId = Math.toIntExact(userIdLong); // Long -> Integer 변환 (임시 해결책)
+			log.info("현재 사용자 ID: {}", userId);
 
 			Optional<SubscriptionCombination> existingCombination =
 					subscriptionCombinationRepository.findBySubscriptionIdAndBrandIdAndUserId(
@@ -181,6 +181,15 @@ public class SubscriptionService {
 			log.warn("카테고리 디코딩 실패: {}", e.getMessage());
 			return category;
 		}
+	}
+
+	private User getCurrentUser() {
+		String currentUserId = getCurrentUserId();
+		return userRepository.findByUserId(currentUserId)
+				.orElseThrow(() -> {
+					log.error("사용자를 찾을 수 없습니다. userId: {}", currentUserId);
+					return new CustomException(ErrorCode.USER_NOT_FOUND);
+				});
 	}
 
 	private String getCurrentUserId() {
