@@ -17,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -61,10 +59,10 @@ public class SubscriptionService {
 	}
 
 	@Transactional
-	public SubscribeResponse subscribe(SubscribeRequest request) {
+	public SubscribeResponse subscribe(SubscribeRequest request, String oauthUserId) {
 		try {
-			log.info("구독 가입 요청 시작 - subscriptionId: {}, brandId: {}",
-					request.getSubscriptionId(), request.getBrandId());
+			log.info("구독 가입 요청 시작 - subscriptionId: {}, brandId: {}, oauthUserId: {}",
+					request.getSubscriptionId(), request.getBrandId(), oauthUserId);
 
 			validateSubscribeRequest(request);
 
@@ -80,11 +78,16 @@ public class SubscriptionService {
 						return new CustomException(ErrorCode.BRAND_NOT_FOUND);
 					});
 
-			// User 도메인을 통해 사용자 정보 조회
-			User currentUser = getCurrentUser();
-			Long userIdLong = currentUser.getId();
-			Integer userId = Math.toIntExact(userIdLong); // Long -> Integer 변환 (임시 해결책)
-			log.info("현재 사용자 ID: {}", userId);
+			// OAuth userId로 실제 User 엔티티 조회
+			User currentUser = userRepository.findByUserId(oauthUserId)
+					.orElseThrow(() -> {
+						log.error("사용자를 찾을 수 없습니다. oauthUserId: {}", oauthUserId);
+						return new CustomException(ErrorCode.USER_NOT_FOUND);
+					});
+
+			// 실제 PK 사용
+			Long userId = currentUser.getId();
+			log.info("현재 사용자 PK: {}", userId);
 
 			Optional<SubscriptionCombination> existingCombination =
 					subscriptionCombinationRepository.findBySubscriptionIdAndBrandIdAndUserId(
@@ -181,32 +184,5 @@ public class SubscriptionService {
 			log.warn("카테고리 디코딩 실패: {}", e.getMessage());
 			return category;
 		}
-	}
-
-	private User getCurrentUser() {
-		String currentUserId = getCurrentUserId();
-		return userRepository.findByUserId(currentUserId)
-				.orElseThrow(() -> {
-					log.error("사용자를 찾을 수 없습니다. userId: {}", currentUserId);
-					return new CustomException(ErrorCode.USER_NOT_FOUND);
-				});
-	}
-
-	private String getCurrentUserId() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null || !auth.isAuthenticated()) {
-			log.warn("인증되지 않은 사용자 접근 시도.");
-			throw new CustomException(ErrorCode.UNAUTHORIZED);
-		}
-
-		String userId = auth.getName();
-
-		if (userId == null || userId.isEmpty()) {
-			log.error("Authentication principal에서 사용자 ID (name)를 가져올 수 없습니다. Principal: {}", auth.getPrincipal());
-			throw new CustomException(ErrorCode.INVALID_USER_ID);
-		}
-
-		log.debug("추출된 사용자 ID (Principal.getName() 결과): {}", userId);
-		return userId;
 	}
 }
