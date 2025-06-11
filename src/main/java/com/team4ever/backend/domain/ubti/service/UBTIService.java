@@ -55,7 +55,7 @@ public class UBTIService {
 				.bodyValue(req)
 				.retrieve()
 				.bodyToMono(UBTIResult.class)
-				.map(BaseResponse::success)
+				.map(data -> BaseResponse.success(data, "메인 구독 상품 조회 성공"))
 				.onErrorResume(e -> Mono.just(BaseResponse.error(ErrorCode.INTERNAL_SERVER_ERROR)));
 	}
 }

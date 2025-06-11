@@ -61,8 +61,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         // 1) /login/{provider} 경로로 인가 요청을 받도록 설정
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .baseUri("/auth")
+                        .authorizationEndpoint(endpoint ->
+                                endpoint.baseUri("/api/auth")
                                 .authorizationRequestRepository(authorizationRepo)
                         )
                         // 2) userInfo
@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .successHandler(successHandler)
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout")                      // 클라이언트가 호출할 로그아웃 URL
+                        .logoutUrl("/api/auth/logout")                      // 클라이언트가 호출할 로그아웃 URL
                         .invalidateHttpSession(true)
                         .deleteCookies("ACCESS_TOKEN", "JSESSIONID")
                         .addLogoutHandler((request, response, authentication) -> {
