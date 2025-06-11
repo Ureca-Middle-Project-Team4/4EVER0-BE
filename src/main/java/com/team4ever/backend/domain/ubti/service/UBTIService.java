@@ -53,6 +53,10 @@ public class UBTIService {
 				.retrieve()
 				.bodyToMono(UBTIResult.class)
 				.map(data -> BaseResponse.success(data))
-				.onErrorResume(e -> Mono.just(BaseResponse.error(ErrorCode.INTERNAL_SERVER_ERROR)));
+				.onErrorResume(e ->
+						Mono.just(
+								BaseResponse.error(ErrorCode.INTERNAL_SERVER_ERROR)
+						)
+				);
 	}
 }
