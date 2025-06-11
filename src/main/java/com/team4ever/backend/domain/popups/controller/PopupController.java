@@ -18,11 +18,11 @@ public class PopupController {
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<PopupResponse>>> getAll() {
-        return ResponseEntity.ok(BaseResponse.success(popupService.getAllPopups(), "팝업 전체 조회 성공"));
+        return ResponseEntity.ok(BaseResponse.success(popupService.getAllPopups()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<PopupResponse>> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(BaseResponse.success(popupService.getPopupById(id), "팝업 상세 조회 성공"));
+        return ResponseEntity.ok(BaseResponse.success(popupService.getPopupById(id)));
     }
 }

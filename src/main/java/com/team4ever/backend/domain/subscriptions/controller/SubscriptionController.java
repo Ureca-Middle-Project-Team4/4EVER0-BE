@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 
+import static com.team4ever.backend.global.response.BaseResponse.*;
+
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
@@ -25,9 +27,8 @@ public class SubscriptionController {
 	 */
 	@GetMapping("/main")
 	public ResponseEntity<BaseResponse<List<SubscriptionResponse>>> getMainSubscriptions() {
-		return ResponseEntity.ok(BaseResponse.success(
-				subscriptionService.getMainSubscriptions(),
-				"메인 구독 상품 조회 성공"
+		return ResponseEntity.ok(success(
+				subscriptionService.getMainSubscriptions()
 		));
 	}
 
@@ -43,9 +44,8 @@ public class SubscriptionController {
 			System.out.println("컨트롤러에서 받은 원본 카테고리: '" + category + "'");
 		}
 
-		return ResponseEntity.ok(BaseResponse.success(
-				subscriptionService.getLifeSubscriptionBrands(category),
-				"라이프 구독 브랜드 조회 성공"
+		return ResponseEntity.ok(success(
+				subscriptionService.getLifeSubscriptionBrands(category)
 		));
 	}
 
@@ -56,9 +56,8 @@ public class SubscriptionController {
 	@PostMapping("/subscribe")
 	public ResponseEntity<BaseResponse<SubscribeResponse>> subscribe(
 			@Valid @RequestBody SubscribeRequest request) {
-		return ResponseEntity.ok(BaseResponse.success(
-				subscriptionService.subscribe(request),
-				"구독 성공"
+		return ResponseEntity.ok(success(
+				subscriptionService.subscribe(request)
 		));
 	}
 }

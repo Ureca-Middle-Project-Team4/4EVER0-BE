@@ -3,8 +3,16 @@ package com.team4ever.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
+@EnableJpaRepositories(
+		basePackages = {
+				"com.team4ever.backend.domain.common.brand",
+				// 필요하다면 여기에 다른 레포지토리 패키지 추가
+
+		}
+)
 public class BackendApplication {
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.configure().load();
