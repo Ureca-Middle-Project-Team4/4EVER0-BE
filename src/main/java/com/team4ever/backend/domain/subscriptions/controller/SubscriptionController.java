@@ -1,9 +1,6 @@
 package com.team4ever.backend.domain.subscriptions.controller;
 
-import com.team4ever.backend.domain.subscriptions.dto.BrandResponse;
-import com.team4ever.backend.domain.subscriptions.dto.SubscribeRequest;
-import com.team4ever.backend.domain.subscriptions.dto.SubscribeResponse;
-import com.team4ever.backend.domain.subscriptions.dto.SubscriptionResponse;
+import com.team4ever.backend.domain.subscriptions.dto.*;
 import com.team4ever.backend.domain.subscriptions.service.SubscriptionService;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
@@ -70,6 +67,25 @@ public class SubscriptionController {
 		String oauthUserId = oAuth2User.getAttribute("id").toString();
 
 		SubscribeResponse response = subscriptionService.subscribe(request, oauthUserId);
+		return ResponseEntity.ok(BaseResponse.success(response));
+	}
+
+
+	/**
+	 * 구독 해지
+	 */
+	@DeleteMapping("/unsubscribe")
+	public ResponseEntity<BaseResponse<UnsubscribeResponse>> unsubscribe(
+			@RequestBody UnsubscribeRequest request,
+			@AuthenticationPrincipal OAuth2User oAuth2User
+	) {
+		if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
+			throw new CustomException(ErrorCode.UNAUTHORIZED);
+		}
+
+		String oauthUserId = oAuth2User.getAttribute("id").toString();
+
+		UnsubscribeResponse response = subscriptionService.unsubscribe(request, oauthUserId);
 		return ResponseEntity.ok(BaseResponse.success(response));
 	}
 }
