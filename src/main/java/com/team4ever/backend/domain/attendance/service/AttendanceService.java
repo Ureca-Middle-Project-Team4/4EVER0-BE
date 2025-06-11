@@ -3,6 +3,8 @@ package com.team4ever.backend.domain.attendance.service;
 import com.team4ever.backend.domain.attendance.entity.Attendance;
 import com.team4ever.backend.domain.attendance.dto.AttendanceDto;
 import com.team4ever.backend.domain.attendance.repository.AttendanceRepository;
+import com.team4ever.backend.domain.user.Entity.User;
+import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -10,27 +12,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public AttendanceDto checkToday(Long userId) {
+        // 1. 유저 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         LocalDate today = LocalDate.now();
-        boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today); // 중복방지
+
+        // 2. 중복 출석 체크
+        boolean exists = attendanceRepository.existsByUserIdAndCheckedDate(userId, today);
         if (exists) {
             throw new CustomException(ErrorCode.ALREADY_CHECKED);
         }
 
-        Attendance saved = attendanceRepository.save(new Attendance(userId, today));
-        return AttendanceDto.from(saved);
+        // 3. 출석 저장
+        attendanceRepository.save(new Attendance(userId, today));
+
+        // 4. 연속 출석일 수 계산
+        int streak = calculateStreak(userId);
+
+        // 5. 유저 테이블에 반영 후 저장
+        user.setAttendanceStreak(streak);
+        userRepository.save(user);
+
+        return AttendanceDto.from(new Attendance(userId, today));
     }
 
     public int getStreak(Long userId) {
+        return calculateStreak(userId);
+    }
+
+    public int calculateStreak(Long userId) {
         List<Attendance> list = attendanceRepository.findAllByUserIdOrderByCheckedDateDesc(userId);
         int streak = 0;
         LocalDate today = LocalDate.now();
@@ -43,17 +64,6 @@ public class AttendanceService {
             }
         }
         return streak;
-    }
-
-    public double calculateRate(Long userId) {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfMonth = today.withDayOfMonth(1); // 이번 달 1일
-        List<Attendance> records = attendanceRepository.findByUserIdAndCheckedDateBetween(userId, startOfMonth, today);
-
-        int attendedDays = records.size();
-        long daysPassed = ChronoUnit.DAYS.between(startOfMonth, today) + 1; // 1일 더해야 하므로 +1
-
-        return Math.round(attendedDays * 100.0 / daysPassed) * 10 / 10.0;
     }
 
 }

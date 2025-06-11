@@ -33,7 +33,7 @@ public class User {
     @Column(nullable = false)
     private LocalDate birth;
 
-    @Column(name = "attendance_streak", nullable = false)
+    @Column(name = "attendance_streaks", nullable = false)
     private Integer attendanceStreak;
 
     @Column(nullable = false)
