@@ -41,18 +41,24 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-
                 .authorizeHttpRequests(auth -> auth
                         // 1) 쿠폰 전체 조회는 인증 없이 허용
                         .requestMatchers(HttpMethod.GET, "/api/coupons").permitAll()
 
                         // 2) OAuth 로그인용 엔드포인트
                         .requestMatchers(
-                                "/**",
-                                "/login/**",
-                                "/oauth2/**",
-                                "/css/**",
-                                "/auth/**",
+                                // 허용 API 목록
+//                                "/**",
+                                "/api/auth/**",
+                                "/api/refresh",
+                                "/api/plans",
+                                "/api/plans/**",
+                                "/api/subscriptions/main",
+                                "/api/subscriptions/brands",
+                                "/api/popups",
+                                "/api/popups/**",
+                                "/api/coupons",
+                                "/api/chat",
 
                                 // ↓ Swagger
                                 "/swagger-ui/**",
@@ -61,11 +67,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-
-                        // 🔐 인증이 필요한 API 엔드포인트
-                        .requestMatchers("/api/chat/likes").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/coupons/*/claim").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

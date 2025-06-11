@@ -45,11 +45,24 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/api/**")
                 .excludePathPatterns(
+                        //REST API
                         "/api/auth/**",
+                        "/api/refresh",
+                        "/api/plans",
+                        "/api/plans/**",
+                        "/api/subscriptions/main",
+                        "/api/subscriptions/brands",
+                        "/api/popups",
+                        "/api/popups/**",
+                        "/api/coupons",
+                        "/api/chat",
+                        //Swagger
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**"
                 );
     }
 
