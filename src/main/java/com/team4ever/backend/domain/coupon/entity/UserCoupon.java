@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "user_coupons")
 @Getter
@@ -18,8 +16,8 @@ public class UserCoupon {
     @Column(columnDefinition = "INT UNSIGNED COMMENT '유저쿠폰 PK'")
     private Integer id;
 
-    @Column(columnDefinition = "INT UNSIGNED COMMENT '유저 FK'")
-    private Integer userId;
+    @Column(columnDefinition = "BIGINT UNSIGNED COMMENT '유저 FK'")
+    private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -31,7 +29,7 @@ public class UserCoupon {
 
     private Boolean isUsed = false;
 
-    public static UserCoupon of(Integer userId, Coupon coupon) {
+    public static UserCoupon of(Long userId, Coupon coupon) {
         UserCoupon uc = new UserCoupon();
         uc.userId = userId;
         uc.coupon = coupon;

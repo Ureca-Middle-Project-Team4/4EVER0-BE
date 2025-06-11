@@ -5,6 +5,8 @@ import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
 import com.team4ever.backend.domain.coupon.service.CouponService;
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +34,20 @@ public class CouponController {
 
     @Operation(summary = "특정 쿠폰 발급 요청")
     @PostMapping("/claim")
-    public BaseResponse<CouponClaimResponse> claimCoupon(@RequestBody CouponClaimRequest request) {
-        CouponClaimResponse response = couponService.claimCoupon(request.getUserId(), request.getCouponId());
-        return BaseResponse.success(response);
+    public BaseResponse<CouponClaimResponse> claimCoupon(
+            @AuthenticationPrincipal OAuth2User oAuth2User,
+            @RequestBody CouponClaimRequest request
+    ) {
+        if (oAuth2User == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Long userId = Long.valueOf(oAuth2User.getAttribute("id").toString());
+        return BaseResponse.success(couponService.claimCoupon(userId, request.getCouponId()));
     }
+
+
+
 
 
 
@@ -45,22 +57,22 @@ public class CouponController {
             @PathVariable Integer couponId,
             @AuthenticationPrincipal OAuth2User oauth2User
     ) {
-        Integer userId = extractUserId(oauth2User);
+        Long userId = extractUserId(oauth2User);
         return BaseResponse.success(
                 couponService.useCoupon(userId, couponId)
         );
     }
 
-    private Integer extractUserId(OAuth2User oauth2User) {
-        // CustomOAuth2UserService에서 "id" 속성으로 매핑해 준 값을 꺼냅니다.
+    private Long extractUserId(OAuth2User oauth2User) {
         Object idAttr = oauth2User.getAttribute("id");
         if (idAttr == null) {
             throw new IllegalStateException("OAuth2User에 'id' 속성이 없습니다.");
         }
         try {
-            return Integer.valueOf(idAttr.toString());
+            return Long.valueOf(idAttr.toString());
         } catch (NumberFormatException e) {
             throw new IllegalStateException("'id' 속성의 형식이 올바르지 않습니다: " + idAttr);
         }
     }
+
 }

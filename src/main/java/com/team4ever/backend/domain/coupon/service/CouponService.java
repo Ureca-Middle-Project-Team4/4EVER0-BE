@@ -24,7 +24,7 @@ public class CouponService {
     private final UserCouponRepository userCouponRepository;
 
     @Transactional(readOnly = true)
-    public List<CouponResponse> getAllCoupons(Integer userId) {
+    public List<CouponResponse> getAllCoupons(Long userId) {
         LocalDate today = LocalDate.now();
         return couponRepository.findAllValid(today).stream()
                 .map(c -> {
@@ -38,7 +38,7 @@ public class CouponService {
     }
 
     @Transactional
-    public CouponClaimResponse claimCoupon(Integer userId, Integer couponId) {
+    public CouponClaimResponse claimCoupon(Long userId, Integer couponId) {
         var coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
@@ -56,7 +56,7 @@ public class CouponService {
     }
 
     @Transactional
-    public CouponUseResponse useCoupon(Integer userId, Integer couponId) {
+    public CouponUseResponse useCoupon(Long userId, Integer couponId) {
         UserCoupon uc = userCouponRepository.findByUserIdAndCouponId(userId, couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_CLAIMED));
         if (uc.getIsUsed()) {
