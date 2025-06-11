@@ -12,11 +12,13 @@ public class BaseResponse<T> {
 	private String message;
 	private T data;
 
-	public static <T> BaseResponse<T> success(T data) {
+	public static <T> BaseResponse<T> success(T data, String 메인_구독_상품_조회_성공) {
 		return new BaseResponse<>(200, "요청 성공", data);
 	}
 
-	public static BaseResponse<?> error(ErrorCode errorCode) {
+	// 제네릭 메서드로 변경
+	public static <T> BaseResponse<T> error(ErrorCode errorCode) {
 		return new BaseResponse<>(errorCode.getStatus().value(), errorCode.getMessage(), null);
 	}
 }
+
