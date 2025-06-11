@@ -1,17 +1,14 @@
-package com.team4ever.backend.domain.subscriptions.entity;
+package com.team4ever.backend.domain.common.brand;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+@Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "brands")
-@Getter
-@Setter
-@NoArgsConstructor
 public class Brand {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(columnDefinition = "INTEGER COMMENT '브랜드 PK'")

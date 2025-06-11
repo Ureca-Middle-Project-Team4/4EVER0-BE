@@ -1,5 +1,6 @@
 package com.team4ever.backend.domain.coupon.entity;
 
+import com.team4ever.backend.domain.common.brand.Brand;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

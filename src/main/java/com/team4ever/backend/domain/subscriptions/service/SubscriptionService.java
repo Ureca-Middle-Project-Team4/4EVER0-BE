@@ -1,11 +1,11 @@
 package com.team4ever.backend.domain.subscriptions.service;
 
+import com.team4ever.backend.domain.common.brand.Brand;
+import com.team4ever.backend.domain.common.brand.BrandRepository;
 import com.team4ever.backend.domain.subscriptions.dto.*;
-import com.team4ever.backend.domain.subscriptions.entity.Brand;
 import com.team4ever.backend.domain.subscriptions.entity.Subscription;
 import com.team4ever.backend.domain.subscriptions.entity.SubscriptionCombination;
 import com.team4ever.backend.domain.subscriptions.entity.UserSubscriptionCombination;
-import com.team4ever.backend.domain.subscriptions.repository.BrandRepository;
 import com.team4ever.backend.domain.subscriptions.repository.SubscriptionCombinationRepository;
 import com.team4ever.backend.domain.subscriptions.repository.SubscriptionRepository;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
@@ -32,10 +32,10 @@ import java.util.stream.Collectors;
 public class SubscriptionService {
 
 	private final SubscriptionRepository subscriptionRepository;
-	private final BrandRepository brandRepository;
 	private final SubscriptionCombinationRepository subscriptionCombinationRepository;
 	private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
 	private final UserRepository userRepository;
+	private final BrandRepository brandRepository;
 
 	public List<SubscriptionResponse> getMainSubscriptions() {
 		return subscriptionRepository.findAll().stream()

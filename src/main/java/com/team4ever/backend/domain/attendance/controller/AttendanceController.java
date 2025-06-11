@@ -5,7 +5,6 @@ import com.team4ever.backend.domain.attendance.dto.AttendanceRequest;
 import com.team4ever.backend.domain.attendance.service.AttendanceService;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +30,7 @@ public class AttendanceController {
     @Operation(summary = "연속 출석률 조회")
     @GetMapping("/rate")
     public BaseResponse<Double> getRate(@RequestParam Long userId) {
-        double rate = attendanceService.calculateRate(userId);
+        double rate = attendanceService.calculateStreak(userId);
         return BaseResponse.success(rate);
     }
 }
