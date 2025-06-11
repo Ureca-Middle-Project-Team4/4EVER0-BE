@@ -10,6 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CouponClaimRequest {
-    private Integer userId;  // 나중에 SecurityContext 등으로 대체
     private Integer couponId;
 }
