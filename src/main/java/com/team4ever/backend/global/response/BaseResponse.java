@@ -1,6 +1,5 @@
 package com.team4ever.backend.global.response;
 
-import com.team4ever.backend.domain.ubti.dto.UBTIResult;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +12,7 @@ public class BaseResponse<T> {
 	private String message;
 	private T data;
 
-	public static <T> BaseResponse<T> success(T data) {
+	public static <T> BaseResponse<T> success(T data, String 메인_구독_상품_조회_성공) {
 		return new BaseResponse<>(200, "요청 성공", data);
 	}
 
