@@ -41,7 +41,10 @@ public class CouponController {
         if (oAuth2User == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
-
+        Object idAttr = oAuth2User.getAttribute("id");
+        if (idAttr == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
         Long userId = Long.valueOf(oAuth2User.getAttribute("id").toString());
         return BaseResponse.success(couponService.claimCoupon(userId, request.getCouponId()));
     }
