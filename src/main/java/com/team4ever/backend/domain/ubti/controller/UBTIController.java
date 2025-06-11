@@ -7,6 +7,7 @@ import com.team4ever.backend.global.response.BaseResponse;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,9 +22,9 @@ public class UBTIController {
 	@PostMapping(
 			value = "/question",
 			consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.TEXT_PLAIN_VALUE
+			produces = MediaType.TEXT_EVENT_STREAM_VALUE // 스트리밍 명시
 	)
-	public Flux<String> nextQuestion(@RequestBody UBTIRequest req) {
+	public Flux<ServerSentEvent<String>> nextQuestion(@RequestBody UBTIRequest req) {
 		return ubtiService.nextQuestionStream(req);
 	}
 
@@ -31,5 +32,4 @@ public class UBTIController {
 	public Mono<BaseResponse<UBTIResult>> finalResult(@RequestBody UBTIRequest req) {
 		return ubtiService.finalResultWrapped(req);
 	}
-
 }
