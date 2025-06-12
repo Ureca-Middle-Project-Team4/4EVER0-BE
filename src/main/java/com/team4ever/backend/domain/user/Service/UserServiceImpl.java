@@ -54,11 +54,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public void getUserByUserId(String userId) {
+    public UserResponse getUserByUserId(String userId) { // void → UserResponse로 수정
         User u = repo.findByUserId(userId)
                 //Exception 나중에 정의해서 바꾸기
                 .orElseThrow(() -> new IllegalArgumentException("해당 userId를 찾을 수 없습니다."));
-        UserResponse.builder()
+
+        return UserResponse.builder() // return 추가
                 .id(u.getId())
                 .planId(u.getPlanId())
                 .userId(u.getUserId())
@@ -72,8 +73,8 @@ public class UserServiceImpl implements UserService {
     }
 
     // 사용자 구독 목록 조회
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public UserSubscriptionListResponse getUserSubscriptions(String oauthUserId) {
         try {
             log.info("사용자 구독 목록 조회 시작 - oauthUserId: {}", oauthUserId);
