@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserSubscriptionCombinationRepository extends JpaRepository<UserSubscriptionCombination, Integer> {
-	boolean existsByUserIdAndSubscriptionCombinationId(Integer userId, Integer subscriptionCombinationId);
+	boolean existsByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
 }

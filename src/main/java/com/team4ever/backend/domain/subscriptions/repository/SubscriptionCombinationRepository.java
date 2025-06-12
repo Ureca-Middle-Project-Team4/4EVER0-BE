@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface SubscriptionCombinationRepository extends JpaRepository<SubscriptionCombination, Integer> {
-	Optional<SubscriptionCombination> findBySubscriptionIdAndBrandIdAndUserId(
-			Integer subscriptionId, Integer brandId, Integer userId);
+	Optional<SubscriptionCombination> findBySubscriptionIdAndBrandIdAndUserId(Integer subscriptionId, Integer brandId, Long userId);
 }
