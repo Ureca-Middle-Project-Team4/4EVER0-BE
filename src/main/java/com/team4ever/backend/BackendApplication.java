@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 				"com.team4ever.backend.domain.common.brand",
 				"com.team4ever.backend.domain.plan.repository",
 				"com.team4ever.backend.domain.benefit.repository",
+				"com.team4ever.backend.domain.common.couponlike",
 				"com.team4ever.backend.domain.attendance.repository",
 				"com.team4ever.backend.domain.coupon.repository",
 				"com.team4ever.backend.domain.popups.repository",

@@ -2,6 +2,7 @@ package com.team4ever.backend.domain.user.Controller;
 
 import com.team4ever.backend.domain.user.Service.UserService;
 import com.team4ever.backend.domain.user.dto.CreateUserRequest;
+import com.team4ever.backend.domain.user.dto.LikedCouponsResponse;
 import com.team4ever.backend.domain.user.dto.UserResponse;
 import com.team4ever.backend.domain.user.dto.UserSubscriptionListResponse;
 import com.team4ever.backend.global.exception.CustomException;
@@ -53,6 +54,23 @@ public class UserController {
         String oauthUserId = oAuth2User.getAttribute("id").toString();
 
         UserSubscriptionListResponse response = svc.getUserSubscriptions(oauthUserId); // userService → svc로 변경!
+        return ResponseEntity.ok(BaseResponse.success(response));
+    }
+
+    /**
+     * 좋아요한 쿠폰 목록 조회
+     */
+    @GetMapping("/likes/coupons")
+    public ResponseEntity<BaseResponse<LikedCouponsResponse>> getLikedCoupons(
+            @AuthenticationPrincipal OAuth2User oAuth2User
+    ) {
+        if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String oauthUserId = oAuth2User.getAttribute("id").toString();
+
+        LikedCouponsResponse response = svc.getLikedCoupons(oauthUserId);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
 }
