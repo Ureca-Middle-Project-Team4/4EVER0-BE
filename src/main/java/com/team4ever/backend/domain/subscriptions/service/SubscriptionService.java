@@ -141,6 +141,62 @@ public class SubscriptionService {
 		}
 	}
 
+	@Transactional
+	public UnsubscribeResponse unsubscribe(UnsubscribeRequest request, String oauthUserId) {
+		try {
+			log.info("구독 해지 요청 시작 - subscriptionCombinationId: {}, oauthUserId: {}",
+					request.getSubscriptionCombinationId(), oauthUserId);
+
+			// 해지 요청 유효성 검사
+			if (request.getSubscriptionCombinationId() == null || request.getSubscriptionCombinationId() <= 0) {
+				log.error("유효하지 않은 구독 조합 ID: {}", request.getSubscriptionCombinationId());
+				throw new CustomException(ErrorCode.INVALID_SUBSCRIPTION_REQUEST);
+			}
+
+			// 사용자 조회
+			User currentUser = userRepository.findByUserId(oauthUserId)
+					.orElseThrow(() -> {
+						log.error("사용자를 찾을 수 없습니다. oauthUserId: {}", oauthUserId);
+						return new CustomException(ErrorCode.USER_NOT_FOUND);
+					});
+
+			Long userId = currentUser.getId();
+			log.info("해지 요청 사용자 PK: {}", userId);
+
+			// 사용자의 구독 내역 조회
+			UserSubscriptionCombination userSubscription = userSubscriptionCombinationRepository
+					.findByUserIdAndSubscriptionCombinationId(userId, request.getSubscriptionCombinationId())
+					.orElseThrow(() -> {
+						log.error("구독하지 않은 상품입니다. userId: {}, subscriptionCombinationId: {}",
+								userId, request.getSubscriptionCombinationId());
+						return new CustomException(ErrorCode.SUBSCRIPTION_NOT_SUBSCRIBED);
+					});
+
+			log.info("해지할 구독 내역 조회 완료 - userSubscriptionId: {}, price: {}",
+					userSubscription.getId(), userSubscription.getPrice());
+
+			// 응답용 데이터 미리 저장 (삭제 전에)
+			Integer subscriptionCombinationId = userSubscription.getSubscriptionCombinationId();
+
+			// 물리적 삭제
+			userSubscriptionCombinationRepository.delete(userSubscription);
+			log.info("구독 해지 완료 - subscriptionCombinationId: {}, userId: {}",
+					subscriptionCombinationId, userId);
+
+			return UnsubscribeResponse.builder()
+					.subscriptionCombinationId(subscriptionCombinationId)
+					.message("구독이 성공적으로 해지되었습니다.")
+					.build();
+
+		} catch (CustomException e) {
+			log.error("구독 해지 오류 발생: {}", e.getMessage(), e);
+			throw e;
+		} catch (Exception e) {
+			log.error("구독 해지 중 예상치 못한 오류 발생", e);
+			throw new CustomException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
+		}
+	}
+
 	private SubscriptionResponse toSubscriptionResponse(Subscription subscription) {
 		return SubscriptionResponse.builder()
 				.id(subscription.getId())
