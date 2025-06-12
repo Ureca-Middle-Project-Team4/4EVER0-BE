@@ -38,24 +38,10 @@ public class UserController {
 
     // userId로 회원 정보 조회
     @GetMapping
-    public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
-        // 1) ACCESS_TOKEN 쿠키 꺼내기
-        Cookie cookie = WebUtils.getCookie(request, "ACCESS_TOKEN");
-        if (cookie == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-        // 2) JWT에서 userId 추출 (예: sub 클레임)
-        String userId = jwtProvider.getUserId(cookie.getValue());
-        if (userId == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-        // 3) 서비스 호출
-        UserResponse dto = svc.getUserByUserId(userId);
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        UserResponse dto = svc.getCurrentUser();
         return ResponseEntity.ok(dto);
     }
-
     /**
      * 내 구독 상품 목록 조회
      */
