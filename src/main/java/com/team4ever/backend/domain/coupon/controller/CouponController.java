@@ -33,20 +33,19 @@ public class CouponController {
     }
 
     @Operation(summary = "특정 쿠폰 발급 요청")
-    @PostMapping("/claim")
+    @PostMapping("/{couponId}/claim")
     public BaseResponse<CouponClaimResponse> claimCoupon(
-            @AuthenticationPrincipal OAuth2User oAuth2User,
-            @RequestBody CouponClaimRequest request
+            @PathVariable Integer couponId,
+            @AuthenticationPrincipal OAuth2User oAuth2User
     ) {
-        if (oAuth2User == null) {
+        if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
-        Object idAttr = oAuth2User.getAttribute("id");
-        if (idAttr == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
+
         Long userId = Long.valueOf(oAuth2User.getAttribute("id").toString());
-        return BaseResponse.success(couponService.claimCoupon(userId, request.getCouponId()));
+
+        CouponClaimResponse response = couponService.claimCoupon(userId, couponId);
+        return BaseResponse.success(response);
     }
 
 
@@ -60,7 +59,16 @@ public class CouponController {
             @PathVariable Integer couponId,
             @AuthenticationPrincipal OAuth2User oauth2User
     ) {
-        Long userId = extractUserId(oauth2User);
+        if (oauth2User == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Object idAttr = oauth2User.getAttribute("id");
+        if (idAttr == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Long userId = Long.valueOf(idAttr.toString());
         return BaseResponse.success(
                 couponService.useCoupon(userId, couponId)
         );
