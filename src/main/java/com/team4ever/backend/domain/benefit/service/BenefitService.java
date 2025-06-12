@@ -23,7 +23,8 @@ public class BenefitService {
     }
 
     public List<BenefitResponse> getBenefitsByDate(LocalDate date) {
-        return benefitRepository.findAllByDate(date).stream()
+        List<Benefit> benefits = benefitRepository.findAllByDate(date);
+        return benefits.stream()
                 .map(BenefitResponse::from)
                 .collect(Collectors.toList());
     }
