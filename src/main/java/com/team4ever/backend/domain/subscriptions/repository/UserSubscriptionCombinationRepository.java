@@ -13,11 +13,9 @@ import java.util.Optional;
 @Repository
 public interface UserSubscriptionCombinationRepository extends JpaRepository<UserSubscriptionCombination, Integer> {
 
-	// 기존 메서드들
 	boolean existsByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
 	Optional<UserSubscriptionCombination> findByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
 
-	// 사용자 구독 목록 조회 (구독 상품명 + 브랜드명)
 	@Query("""
         SELECT new com.team4ever.backend.domain.user.dto.UserSubscriptionDto(
             usc.id,
@@ -35,6 +33,5 @@ public interface UserSubscriptionCombinationRepository extends JpaRepository<Use
     """)
 	List<UserSubscriptionDto> findUserSubscriptionsWithDetails(@Param("userId") Long userId);
 
-	// 사용자의 총 구독 수 조회
 	long countByUserId(Long userId);
 }
