@@ -5,13 +5,18 @@ import com.team4ever.backend.domain.user.dto.*;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
+import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
+import com.team4ever.backend.domain.coupon.entity.UserCoupon;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
+
 
 @Slf4j
 @Service
@@ -22,13 +27,17 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repo;
     private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
     private final CouponLikeRepository couponLikeRepository;
+    private final UserCouponRepository userCouponRepository;
+
 
     public UserServiceImpl(UserRepository repo,
                            UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
-                           CouponLikeRepository couponLikeRepository) {
+                           CouponLikeRepository couponLikeRepository, UserCouponRepository userCouponRepository) {
         this.repo = repo;
         this.userSubscriptionCombinationRepository = userSubscriptionCombinationRepository;
         this.couponLikeRepository = couponLikeRepository;
+        this.userCouponRepository = userCouponRepository;
+
     }
 
     @Override
@@ -149,4 +158,41 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    //보유 쿠폰 조회
+    @Override
+    @Transactional(readOnly = true)
+    public UserCouponListResponse getMyCoupons(String oauthUserId) {
+        try {
+            log.info("보유 쿠폰 조회 시작 - oauthUserId: {}", oauthUserId);
+
+            User user = repo.findByUserId(oauthUserId)
+                    .orElseThrow(() -> {
+                        log.error("사용자를 찾을 수 없음: {}", oauthUserId);
+                        return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    });
+
+            List<UserCoupon> userCoupons = userCouponRepository.findByUserId(user.getId());
+
+            List<CouponInfoResponse> couponDtos = userCoupons.stream()
+                    .map(uc -> new CouponInfoResponse(
+                            uc.getCoupon().getId().longValue(),
+                            uc.getCoupon().getTitle(),
+                            new CouponInfoResponse.BrandInfo(
+                                    uc.getCoupon().getBrand().getId().longValue(),
+                                    uc.getCoupon().getBrand().getName(),
+                                    uc.getCoupon().getBrand().getImageUrl()
+                            ),
+                            uc.getIsUsed()
+                    ))
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+
+            return new UserCouponListResponse(couponDtos);
+        } catch (Exception e) {
+            log.error("보유 쿠폰 조회 중 오류 발생", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

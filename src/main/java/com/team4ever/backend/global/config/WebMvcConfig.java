@@ -57,6 +57,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/popups/**",
                         "/api/coupons",
                         "/api/chat",
+                        "/api/coupons/**",
+                        "/api/user/coupons",
                         //Swagger
                         "/swagger-ui/**",
                         "/swagger-ui.html",

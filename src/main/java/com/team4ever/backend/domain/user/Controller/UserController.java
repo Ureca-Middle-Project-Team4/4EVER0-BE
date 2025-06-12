@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -73,4 +75,20 @@ public class UserController {
         LikedCouponsResponse response = svc.getLikedCoupons(oauthUserId);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
+    //보유중인 쿠폰 조회
+    @GetMapping("/coupons")
+    public ResponseEntity<BaseResponse<UserCouponListResponse>> getMyCoupons(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String oauthUserId = oAuth2User.getAttribute("id").toString();
+        UserCouponListResponse response = svc.getMyCoupons(oauthUserId);
+        return ResponseEntity.ok(BaseResponse.success(response));
+    }
+
+
+
+
+
 }
