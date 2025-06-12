@@ -4,9 +4,7 @@ import com.team4ever.backend.domain.plan.dto.PlanChangeRequest;
 import com.team4ever.backend.domain.plan.dto.PlanChangeResponse;
 import com.team4ever.backend.domain.plan.dto.PlanResponse;
 import com.team4ever.backend.domain.plan.entity.Plan;
-import com.team4ever.backend.domain.plan.entity.UserPlanHistory;
 import com.team4ever.backend.domain.plan.repository.PlanRepository;
-import com.team4ever.backend.domain.plan.repository.UserPlanHistoryRepository;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.exception.CustomException;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -26,7 +23,6 @@ import java.util.Optional;
 public class PlanService {
 
 	private final PlanRepository planRepository;
-	private final UserPlanHistoryRepository userPlanHistoryRepository;
 	private final UserRepository userRepository;
 
 	/**
@@ -43,12 +39,9 @@ public class PlanService {
 						return new CustomException(ErrorCode.USER_NOT_FOUND);
 					});
 
-			Long userId = currentUser.getId();
 			Integer planId = currentUser.getPlanId();
 
-			log.info("사용자 PK: {}, 현재 요금제 ID: {}", userId, planId);
-
-			// 수정: 요금제가 없는 경우 (planId가 null인 경우)
+			// 요금제가 없는 경우
 			if (planId == null) {
 				throw new CustomException(ErrorCode.PLAN_NOT_FOUND);
 			}
@@ -107,21 +100,13 @@ public class PlanService {
 			currentUser.setPlanId(newPlan.getId());
 			userRepository.save(currentUser);
 
-			// 요금제 변경 이력 저장
-			UserPlanHistory history = UserPlanHistory.builder()
-					.userId(currentUser.getId())
-					.planId(newPlan.getId())
-					.actionType(UserPlanHistory.ActionType.CHANGE)
-					.build();
-			userPlanHistoryRepository.save(history);
-
-			log.info("요금제 변경 완료 - userId: {}, newPlanId: {}, historyId: {}",
-					currentUser.getId(), newPlan.getId(), history.getId());
+			log.info("요금제 변경 완료 - userId: {}, newPlanId: {}",
+					currentUser.getId(), newPlan.getId());
 
 			return PlanChangeResponse.builder()
 					.planId(newPlan.getId())
 					.planName(newPlan.getName())
-					.changedAt(history.getChangedAt())
+					.changedAt(LocalDateTime.now())
 					.message("요금제가 성공적으로 변경되었습니다.")
 					.build();
 
@@ -134,6 +119,9 @@ public class PlanService {
 		}
 	}
 
+	/**
+	 * 요금제 해지
+	 */
 	@Transactional
 	public PlanChangeResponse cancelPlan(String oauthUserId) {
 		try {
@@ -147,31 +135,24 @@ public class PlanService {
 					});
 
 			// 현재 요금제가 있는지 확인
-			if (currentUser.getPlanId() == null || currentUser.getPlanId() == 0) {
+			if (currentUser.getPlanId() == null) {
 				log.warn("해지할 요금제가 없습니다. userId: {}", currentUser.getId());
 				throw new CustomException(ErrorCode.PLAN_NOT_FOUND);
 			}
 
 			Integer currentPlanId = currentUser.getPlanId();
 
-			currentUser.setPlanId(null); // 해지 처리
+			// 요금제 해지 (planId를 null로 설정)
+			currentUser.setPlanId(null);
 			userRepository.save(currentUser);
 
-			// 요금제 해지 이력 저장
-			UserPlanHistory history = UserPlanHistory.builder()
-					.userId(currentUser.getId())
-					.planId(currentPlanId)
-					.actionType(UserPlanHistory.ActionType.CANCEL)
-					.build();
-			userPlanHistoryRepository.save(history);
-
-			log.info("요금제 해지 완료 - userId: {}, cancelledPlanId: {}, historyId: {}",
-					currentUser.getId(), currentPlanId, history.getId());
+			log.info("요금제 해지 완료 - userId: {}, cancelledPlanId: {}",
+					currentUser.getId(), currentPlanId);
 
 			return PlanChangeResponse.builder()
 					.planId(currentPlanId)
-					.planName("")
-					.changedAt(history.getChangedAt())
+					.planName("해지됨")
+					.changedAt(LocalDateTime.now())
 					.message("요금제가 성공적으로 해지되었습니다.")
 					.build();
 
@@ -183,7 +164,6 @@ public class PlanService {
 			throw new CustomException(ErrorCode.PLAN_CANCEL_FAILED);
 		}
 	}
-
 
 	/**
 	 * Plan 엔티티를 PlanResponse DTO로 변환
