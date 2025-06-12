@@ -1,16 +1,21 @@
 package com.team4ever.backend.domain.user.Service;
 
+import com.team4ever.backend.domain.user.dto.CreateUserRequest;
+import com.team4ever.backend.domain.user.dto.UserResponse;
+import jakarta.servlet.http.Cookie;
 import com.team4ever.backend.domain.common.couponlike.CouponLikeRepository;
 import com.team4ever.backend.domain.user.dto.*;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
+import com.team4ever.backend.global.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.util.WebUtils;
 import java.util.List;
 
 @Slf4j
@@ -22,13 +27,19 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repo;
     private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
     private final CouponLikeRepository couponLikeRepository;
+    private final JwtTokenProvider jwtProvider;
+    private final HttpServletRequest request;
+
 
     public UserServiceImpl(UserRepository repo,
                            UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
-                           CouponLikeRepository couponLikeRepository) {
+                           CouponLikeRepository couponLikeRepository, JwtTokenProvider jwtProvider,
+                           HttpServletRequest request) {
         this.repo = repo;
         this.userSubscriptionCombinationRepository = userSubscriptionCombinationRepository;
         this.couponLikeRepository = couponLikeRepository;
+        this.jwtProvider = jwtProvider;
+        this.request = request;
     }
 
     @Override
@@ -58,10 +69,39 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponse getUserByUserId(String userId) {
         User u = repo.findByUserId(userId)
-                //Exception 나중에 정의해서 바꾸기
+                .orElseThrow(() -> new IllegalArgumentException("해당 userId를 찾을 수 없습니다."));
+        return UserResponse.builder()
+                .id(u.getId())
+                .planId(u.getPlanId())
+                .userId(u.getUserId())
+                .email(u.getEmail())
+                .phoneNumber(u.getPhoneNumber())
+                .name(u.getName())
+                .birth(u.getBirth())
+                .attendanceStreak(u.getAttendanceStreak())
+                .point(u.getPoint())
+                .build();
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser() {
+        // 1) 쿠키에서 토큰 꺼내기
+        Cookie cookie = WebUtils.getCookie(request, "ACCESS_TOKEN");
+        if (cookie == null || !jwtProvider.validateToken(cookie.getValue())) {
+            throw new IllegalStateException("유효한 ACCESS_TOKEN이 필요합니다.");
+        }
+
+        // 2) 토큰에서 userId 추출
+        String userId = jwtProvider.getUserId(cookie.getValue());
+
+        // 3) DB에서 조회
+        User u = repo.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 userId를 찾을 수 없습니다."));
 
-        return UserResponse.builder() // return 추가
+        // 4) DTO 변환
+        return UserResponse.builder()
                 .id(u.getId())
                 .planId(u.getPlanId())
                 .userId(u.getUserId())

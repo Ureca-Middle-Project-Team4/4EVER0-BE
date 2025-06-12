@@ -8,12 +8,16 @@ import com.team4ever.backend.domain.user.dto.UserSubscriptionListResponse;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
+import com.team4ever.backend.global.security.JwtTokenProvider;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.WebUtils;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService svc;
+    private final JwtTokenProvider jwtProvider;
 
     // 신규 회원 생성
     @PostMapping
@@ -33,13 +38,10 @@ public class UserController {
 
     // userId로 회원 정보 조회
     @GetMapping
-    public ResponseEntity<UserResponse> getUser(
-            @RequestParam("userId") String userId
-    ) {
-        UserResponse dto = svc.getUserByUserId(userId);
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        UserResponse dto = svc.getCurrentUser();
         return ResponseEntity.ok(dto);
     }
-
     /**
      * 내 구독 상품 목록 조회
      */
