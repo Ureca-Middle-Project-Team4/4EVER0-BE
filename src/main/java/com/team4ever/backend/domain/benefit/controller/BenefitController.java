@@ -18,11 +18,13 @@ public class BenefitController {
 
     private final BenefitService benefitService;
 
+    @Operation(summary = "이번 달 전체 혜택 조회")
     @GetMapping
     public BenefitApiResponse<List<BenefitResponse>> getAllBenefits() {
         return BenefitApiResponse.ok("요청이 성공적으로 처리되었습니다.", benefitService.getAllBenefits());
     }
 
+    @Operation(summary = "특정 날짜 혜택 조회")
     @GetMapping(params = "date")
     public BenefitApiResponse<List<BenefitResponse>> getBenefitsByDate(@RequestParam String date) {
         LocalDate parsedDate = LocalDate.parse(date);
