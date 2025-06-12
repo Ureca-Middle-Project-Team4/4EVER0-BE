@@ -49,8 +49,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         //REST API
                         "/api/auth/**",
                         "/api/refresh",
-                        "/api/plan",
-                        "/api/plan/**",
+                        "/api/plans",
+                        "/api/plans/**",
                         "/api/subscriptions/main",
                         "/api/subscriptions/brands",
                         "/api/popups",
