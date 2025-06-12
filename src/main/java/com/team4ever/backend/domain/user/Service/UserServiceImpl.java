@@ -1,9 +1,7 @@
 package com.team4ever.backend.domain.user.Service;
 
-import com.team4ever.backend.domain.user.dto.CreateUserRequest;
-import com.team4ever.backend.domain.user.dto.UserResponse;
-import com.team4ever.backend.domain.user.dto.UserSubscriptionDto;
-import com.team4ever.backend.domain.user.dto.UserSubscriptionListResponse;
+import com.team4ever.backend.domain.common.couponlike.CouponLikeRepository;
+import com.team4ever.backend.domain.user.dto.*;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
@@ -23,10 +21,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repo;
     private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
+    private final CouponLikeRepository couponLikeRepository;
 
-    public UserServiceImpl(UserRepository repo, UserSubscriptionCombinationRepository userSubscriptionCombinationRepository) {
+    public UserServiceImpl(UserRepository repo,
+                           UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
+                           CouponLikeRepository couponLikeRepository) {
         this.repo = repo;
         this.userSubscriptionCombinationRepository = userSubscriptionCombinationRepository;
+        this.couponLikeRepository = couponLikeRepository;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserByUserId(String userId) { // void → UserResponse로 수정
+    public UserResponse getUserByUserId(String userId) {
         User u = repo.findByUserId(userId)
                 //Exception 나중에 정의해서 바꾸기
                 .orElseThrow(() -> new IllegalArgumentException("해당 userId를 찾을 수 없습니다."));
@@ -105,6 +107,45 @@ public class UserServiceImpl implements UserService {
             throw e;
         } catch (Exception e) {
             log.error("사용자 구독 목록 조회 중 예상치 못한 오류 발생", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 좋아요한 쿠폰 목록 조회
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public LikedCouponsResponse getLikedCoupons(String oauthUserId) {
+        try {
+            log.info("사용자 좋아요 쿠폰 목록 조회 시작 - oauthUserId: {}", oauthUserId);
+
+            // 사용자 조회
+            User currentUser = repo.findByUserId(oauthUserId)
+                    .orElseThrow(() -> {
+                        log.error("사용자를 찾을 수 없습니다. oauthUserId: {}", oauthUserId);
+                        return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    });
+
+            Long userId = currentUser.getId();
+            log.info("조회 요청 사용자 PK: {}", userId);
+
+            // 좋아요한 쿠폰 목록 조회
+            List<LikedCouponDto> likedCoupons = couponLikeRepository
+                    .findLikedCouponsByUserId(userId);
+
+            log.info("사용자 좋아요 쿠폰 목록 조회 완료 - userId: {}, 좋아요 쿠폰 수: {}",
+                    userId, likedCoupons.size());
+
+            return LikedCouponsResponse.builder()
+                    .coupons(likedCoupons)
+                    .build();
+
+        } catch (CustomException e) {
+            log.error("사용자 좋아요 쿠폰 목록 조회 중 알려진 오류 발생: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("사용자 좋아요 쿠폰 목록 조회 중 예상치 못한 오류 발생", e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
