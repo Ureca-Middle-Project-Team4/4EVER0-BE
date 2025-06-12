@@ -40,7 +40,8 @@ public class PopupController {
     }
 
     /**
-     * 수동 좌표로 근처 팝업스토어 조회 (클라리언ㅌ
+     * 수동 좌표로 근처 팝업스토어 조회
+     * - 예시: GET /api/popups/nearby?lat=37.5665&lng=126.9780&radius=5.0
      */
     @GetMapping("/nearby")
     public ResponseEntity<BaseResponse<List<NearbyPopupResponse>>> getNearbyPopups(
@@ -48,17 +49,21 @@ public class PopupController {
             @RequestParam Double lng,
             @RequestParam(defaultValue = "5.0") Double radius
     ) {
+        log.info("수동 좌표 기반 근처 팝업스토어 조회 - lat: {}, lng: {}, radius: {}km", lat, lng, radius);
+
         NearbyPopupsRequest request = new NearbyPopupsRequest();
         request.setLat(lat);
         request.setLng(lng);
         request.setRadius(radius);
 
         List<NearbyPopupResponse> results = popupService.getNearbyPopups(request);
+
+        log.info("수동 좌표 기반 조회 완료 - 검색된 팝업스토어 수: {}", results.size());
         return ResponseEntity.ok(BaseResponse.success(results));
     }
 
     /**
-     * 🎯 IP 기반 자동 위치로 근처 팝업스토어 조회
+     * IP 기반 자동 위치로 근처 팝업스토어 조회
      */
     @GetMapping("/nearby/location")
     public ResponseEntity<BaseResponse<UserLocationResponse>> getNearbyPopupsAuto(
