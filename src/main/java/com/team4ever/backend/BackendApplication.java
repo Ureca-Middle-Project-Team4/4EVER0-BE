@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		basePackages = {
 				"com.team4ever.backend.domain.common.brand",
 				// 필요하다면 여기에 다른 레포지토리 패키지 추가
+				"com.team4ever.backend.domain.plan.repository",
 				"com.team4ever.backend.domain.attendance.repository",
 				"com.team4ever.backend.domain.coupon.repository",
 				"com.team4ever.backend.domain.popups.repository",
