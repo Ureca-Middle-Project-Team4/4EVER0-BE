@@ -16,14 +16,20 @@ public class PopupController {
 
     private final PopupService popupService;
 
+    /**
+     * 팝업스토어 전체 조회
+     */
     @GetMapping
     public ResponseEntity<BaseResponse<List<PopupResponse>>> getAllPopups() {
         List<PopupResponse> result = popupService.getAllPopups();
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 
+    /**
+     * 팝업스토어 ID로 조회
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<PopupResponse>> getPopupById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<PopupResponse>> getPopupById(@PathVariable Integer id) {
         PopupResponse result = popupService.getPopupById(id);
         return ResponseEntity.ok(BaseResponse.success(result));
     }

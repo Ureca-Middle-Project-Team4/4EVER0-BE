@@ -1,6 +1,5 @@
 package com.team4ever.backend.global.response;
 
-import com.team4ever.backend.domain.ubti.dto.UBTIResult;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BaseResponse<T> {
-
 	private int status;
 	private String message;
 	private T data;
@@ -17,9 +15,8 @@ public class BaseResponse<T> {
 		return new BaseResponse<>(200, "요청 성공", data);
 	}
 
-	// 제네릭 메서드로 변경
+	// ← change here: add <T> on the method signature
 	public static <T> BaseResponse<T> error(ErrorCode errorCode) {
 		return new BaseResponse<>(errorCode.getStatus().value(), errorCode.getMessage(), null);
 	}
 }
-

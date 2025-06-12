@@ -1,4 +1,3 @@
-// src/main/java/com/uplus/oauth_demo/config/RedisConfig.java
 package com.team4ever.backend.global.config;
 
 import org.springframework.beans.factory.annotation.Value;

@@ -9,7 +9,6 @@ import java.time.Duration;
 @Service
 public class RedisService {
 
-    private static final String REFRESH_KEY_PREFIX = "refresh_token:";
     private final ValueOperations<String,String> ops;
     private final Duration refreshTtl;
 
@@ -26,11 +25,11 @@ public class RedisService {
     }
 
     public String getRefreshToken(String userId) {
-        return ops.get("refresh_token:" + userId);
+        return ops.get(userId);
     }
 
     public void deleteRefreshToken(String userId) {
         System.out.println("[RedisService] deleteRefreshToken 호출 userId=" + userId);
-        ops.getOperations().delete(REFRESH_KEY_PREFIX + userId);
+        ops.getOperations().delete(userId);
     }
 }

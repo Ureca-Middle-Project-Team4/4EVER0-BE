@@ -2,14 +2,9 @@ package com.team4ever.backend.domain.popups.repository;
 
 import com.team4ever.backend.domain.popups.entity.Popup;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-public interface PopupRepository extends JpaRepository<Popup, Long> {
-
-    List<Popup> findAllByUserId(Long userId);
-
-    List<Popup> findAllByUserIdAndIsBookmarkedTrue(Long userId);
-
-    boolean existsByUserIdAndId(Long userId, Long popupId);
+@Repository
+public interface PopupRepository extends JpaRepository<Popup, Integer> {
+    // 기본 CRUD 메서드는 JpaRepository에서 제공
 }
