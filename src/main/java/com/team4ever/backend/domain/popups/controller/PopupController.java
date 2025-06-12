@@ -26,5 +26,6 @@ public class PopupController {
     public ResponseEntity<BaseResponse<PopupResponse>> getPopupById(@PathVariable Long id) {
         PopupResponse result = popupService.getPopupById(id);
         return ResponseEntity.ok(BaseResponse.success(result));
+
     }
 }

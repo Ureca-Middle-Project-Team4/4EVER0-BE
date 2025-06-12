@@ -7,10 +7,10 @@ import org.springframework.http.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
-import java.util.*;
+
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
 public class JwtTokenController {
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;
@@ -21,7 +21,7 @@ public class JwtTokenController {
         this.redisService = redisService;
     }
 
-    @GetMapping("/{provider}")
+    @GetMapping("/auth/{provider}")
     public void login(@PathVariable String provider, HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/" + provider);
     }

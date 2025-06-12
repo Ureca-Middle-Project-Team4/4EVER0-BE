@@ -7,6 +7,8 @@ import com.team4ever.backend.global.security.RedisService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
@@ -37,14 +39,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // 1) 쿠폰 전체 조회는 인증 없이 허용
+                        .requestMatchers(HttpMethod.GET, "/api/coupons").permitAll()
+
+                        // 2) OAuth 로그인용 엔드포인트
                         .requestMatchers(
-                                "/**",
-                                "/login/**",
-                                "/oauth2/**",
-                                "/css/**",
-                                "/auth/**",
+                                // 허용 API 목록
+//                                "/**",
+                                "/api/auth/**",
+                                "/api/refresh",
+                                "/api/plans",
+                                "/api/plans/**",
+                                "/api/subscriptions/main",
+                                "/api/subscriptions/brands",
+                                "/api/popups",
+                                "/api/popups/**",
+                                "/api/coupons",
+                                "/api/chat",
 
                                 // ↓ Swagger
                                 "/swagger-ui/**",
@@ -53,16 +67,12 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-
-                        // 🔐 인증이 필요한 API 엔드포인트
-                        .requestMatchers("/api/chat/likes").authenticated()
-
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         // 1) /login/{provider} 경로로 인가 요청을 받도록 설정
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .baseUri("/auth")
+                        .authorizationEndpoint(endpoint ->
+                                endpoint.baseUri("/api/auth")
                                 .authorizationRequestRepository(authorizationRepo)
                         )
                         // 2) userInfo
@@ -73,7 +83,7 @@ public class SecurityConfig {
                         .successHandler(successHandler)
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout")                      // 클라이언트가 호출할 로그아웃 URL
+                        .logoutUrl("/api/auth/logout")                      // 클라이언트가 호출할 로그아웃 URL
                         .invalidateHttpSession(true)
                         .deleteCookies("ACCESS_TOKEN", "JSESSIONID")
                         .addLogoutHandler((request, response, authentication) -> {
