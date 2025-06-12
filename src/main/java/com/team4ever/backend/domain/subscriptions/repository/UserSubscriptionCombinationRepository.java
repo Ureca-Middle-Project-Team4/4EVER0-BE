@@ -4,7 +4,10 @@ import com.team4ever.backend.domain.subscriptions.entity.UserSubscriptionCombina
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserSubscriptionCombinationRepository extends JpaRepository<UserSubscriptionCombination, Integer> {
-	boolean existsByUserIdAndSubscriptionCombinationId(Integer userId, Integer subscriptionCombinationId);
+	boolean existsByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
+	Optional<UserSubscriptionCombination> findByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
 }

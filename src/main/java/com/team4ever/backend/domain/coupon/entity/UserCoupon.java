@@ -16,7 +16,7 @@ public class UserCoupon {
     @Column(columnDefinition = "INT UNSIGNED COMMENT '유저쿠폰 PK'")
     private Integer id;
 
-    @Column(columnDefinition = "INT UNSIGNED COMMENT '유저 FK'")
+    @Column(columnDefinition = "BIGINT UNSIGNED COMMENT '유저 FK'")
     private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)

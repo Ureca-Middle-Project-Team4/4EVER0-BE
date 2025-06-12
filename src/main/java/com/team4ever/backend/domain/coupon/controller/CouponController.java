@@ -50,6 +50,9 @@ public class CouponController {
 
 
 
+
+
+
     @Operation(summary = "특정 쿠폰 사용 처리")
     @PatchMapping("/{couponId}/use")
     public BaseResponse<CouponUseResponse> useCoupon(
@@ -71,17 +74,16 @@ public class CouponController {
         );
     }
 
-
-    private Integer extractUserId(OAuth2User oauth2User) {
-        // CustomOAuth2UserService에서 "id" 속성으로 매핑해 준 값을 꺼냅니다.
+    private Long extractUserId(OAuth2User oauth2User) {
         Object idAttr = oauth2User.getAttribute("id");
         if (idAttr == null) {
             throw new IllegalStateException("OAuth2User에 'id' 속성이 없습니다.");
         }
         try {
-            return Integer.valueOf(idAttr.toString());
+            return Long.valueOf(idAttr.toString());
         } catch (NumberFormatException e) {
             throw new IllegalStateException("'id' 속성의 형식이 올바르지 않습니다: " + idAttr);
         }
     }
+
 }

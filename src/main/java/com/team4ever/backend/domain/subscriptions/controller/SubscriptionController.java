@@ -1,13 +1,14 @@
 package com.team4ever.backend.domain.subscriptions.controller;
 
-import com.team4ever.backend.domain.subscriptions.dto.BrandResponse;
-import com.team4ever.backend.domain.subscriptions.dto.SubscribeRequest;
-import com.team4ever.backend.domain.subscriptions.dto.SubscribeResponse;
-import com.team4ever.backend.domain.subscriptions.dto.SubscriptionResponse;
+import com.team4ever.backend.domain.subscriptions.dto.*;
 import com.team4ever.backend.domain.subscriptions.service.SubscriptionService;
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -55,9 +56,36 @@ public class SubscriptionController {
 	 */
 	@PostMapping("/subscribe")
 	public ResponseEntity<BaseResponse<SubscribeResponse>> subscribe(
-			@Valid @RequestBody SubscribeRequest request) {
-		return ResponseEntity.ok(success(
-				subscriptionService.subscribe(request)
-		));
+			@RequestBody SubscribeRequest request,
+			@AuthenticationPrincipal OAuth2User oAuth2User
+	) {
+		if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
+			throw new CustomException(ErrorCode.UNAUTHORIZED);
+		}
+
+		// OAuth에서 받은 사용자 ID를 String으로 처리
+		String oauthUserId = oAuth2User.getAttribute("id").toString();
+
+		SubscribeResponse response = subscriptionService.subscribe(request, oauthUserId);
+		return ResponseEntity.ok(BaseResponse.success(response));
+	}
+
+
+	/**
+	 * 구독 해지
+	 */
+	@DeleteMapping("/unsubscribe")
+	public ResponseEntity<BaseResponse<UnsubscribeResponse>> unsubscribe(
+			@RequestBody UnsubscribeRequest request,
+			@AuthenticationPrincipal OAuth2User oAuth2User
+	) {
+		if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
+			throw new CustomException(ErrorCode.UNAUTHORIZED);
+		}
+
+		String oauthUserId = oAuth2User.getAttribute("id").toString();
+
+		UnsubscribeResponse response = subscriptionService.unsubscribe(request, oauthUserId);
+		return ResponseEntity.ok(BaseResponse.success(response));
 	}
 }
