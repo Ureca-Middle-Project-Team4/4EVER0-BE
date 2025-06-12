@@ -17,12 +17,15 @@ public class PopupController {
     private final PopupService popupService;
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<PopupResponse>>> getAll() {
-        return ResponseEntity.ok(BaseResponse.success(popupService.getAllPopups()));
+    public ResponseEntity<BaseResponse<List<PopupResponse>>> getAllPopups() {
+        List<PopupResponse> result = popupService.getAllPopups();
+        return ResponseEntity.ok(BaseResponse.success(result));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<PopupResponse>> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(BaseResponse.success(popupService.getPopupById(id)));
+    public ResponseEntity<BaseResponse<PopupResponse>> getPopupById(@PathVariable Long id) {
+        PopupResponse result = popupService.getPopupById(id);
+        return ResponseEntity.ok(BaseResponse.success(result));
+
     }
 }
