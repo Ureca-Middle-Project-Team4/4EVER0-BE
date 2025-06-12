@@ -9,6 +9,7 @@ import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
 import com.team4ever.backend.global.security.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class UserController {
     private final UserService svc;
     private final JwtTokenProvider jwtProvider;
 
+    @Operation(summary = "새 회원 만들기")
     // 신규 회원 생성
     @PostMapping
     public ResponseEntity<Long> createUser(
@@ -36,15 +38,15 @@ public class UserController {
         return ResponseEntity.ok(id);
     }
 
+    @Operation(summary = "내 정보 조회")
     // userId로 회원 정보 조회
     @GetMapping
     public ResponseEntity<UserResponse> getCurrentUser() {
         UserResponse dto = svc.getCurrentUser();
         return ResponseEntity.ok(dto);
     }
-    /**
-     * 내 구독 상품 목록 조회
-     */
+
+    @Operation(summary = "내 구독 상품 목록 조회")
     @GetMapping("/subscriptions")
     public ResponseEntity<BaseResponse<UserSubscriptionListResponse>> getUserSubscriptions(
             @AuthenticationPrincipal OAuth2User oAuth2User
@@ -59,9 +61,7 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success(response));
     }
 
-    /**
-     * 좋아요한 쿠폰 목록 조회
-     */
+    @Operation(summary = "내 좋아요한 쿠폰 목록 조회")
     @GetMapping("/likes/coupons")
     public ResponseEntity<BaseResponse<LikedCouponsResponse>> getLikedCoupons(
             @AuthenticationPrincipal OAuth2User oAuth2User
