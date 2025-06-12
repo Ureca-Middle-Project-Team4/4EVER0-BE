@@ -19,22 +19,29 @@ public class PopupService {
 
     private final PopupRepository popupRepository;
 
-    /** 전체 조회 */
+    /**
+     * 팝업스토어 전체 조회
+     */
     public List<PopupResponse> getAllPopups() {
         return popupRepository.findAll().stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-    /** ID로 조회 */
+    /**
+     * 팝업스토어 ID로 조회
+     */
     public PopupResponse getPopupById(Integer id) {
         Popup popup = popupRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.POPUP_NOT_FOUND));
         return toResponse(popup);
     }
 
+    /**
+     * Popup 엔티티를 PopupResponse DTO로 변환
+     */
     private PopupResponse toResponse(Popup popup) {
-        // description의 \n을 공백으로 치환해야 함
+        // description의 \n을 공백으로 치환
         String cleanedDescription = popup.getDescription() != null
                 ? popup.getDescription().replace("\n", " ")
                 : "";
@@ -49,5 +56,4 @@ public class PopupService {
                 .imageUrl(popup.getImageUrl())
                 .build();
     }
-
 }
