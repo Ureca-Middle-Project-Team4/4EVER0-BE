@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "coupon-like-controller", description = "쿠폰 좋아요 및 BEST 3 혜택 API")
+@Tag(name = "coupon-like-controller")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/coupons")
