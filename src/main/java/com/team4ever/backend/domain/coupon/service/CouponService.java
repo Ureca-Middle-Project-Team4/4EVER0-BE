@@ -1,12 +1,10 @@
 package com.team4ever.backend.domain.coupon.service;
 
-import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponLikeResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
-import com.team4ever.backend.domain.coupon.entity.CouponLike;
+import com.team4ever.backend.domain.common.couponlike.CouponLike;
+import com.team4ever.backend.domain.common.couponlike.CouponLikeRepository;
+import com.team4ever.backend.domain.coupon.dto.*;
+import com.team4ever.backend.domain.coupon.entity.Coupon;
 import com.team4ever.backend.domain.coupon.entity.UserCoupon;
-import com.team4ever.backend.domain.coupon.repository.CouponLikeRepository;
 import com.team4ever.backend.domain.coupon.repository.CouponRepository;
 import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
 import com.team4ever.backend.global.exception.CustomException;
@@ -69,8 +67,9 @@ public class CouponService {
         uc.markAsUsed();
         return CouponUseResponse.from(uc);
     }
+
     @Transactional
-    public CouponLikeResponse likeCoupon(Integer couponId, Integer userId, Integer brandId) {
+    public CouponLikeResponse likeCoupon(Integer couponId, Long userId, Integer brandId) {
         CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
                 .orElse(null);
 
@@ -80,10 +79,17 @@ public class CouponService {
             }
             like.like();
         } else {
-            couponLikeRepository.save(CouponLike.create(couponId, userId, brandId));
+            couponLikeRepository.save(CouponLike.create(couponId, userId.intValue(), brandId));
         }
 
         return new CouponLikeResponse(true, Long.valueOf(couponId));
     }
 
+    @Transactional(readOnly = true)
+    public List<CouponSummary> getBestCoupons() {
+        List<Coupon> topCoupons = couponRepository.findTop3ByLikeCount();
+        return topCoupons.stream()
+                .map(CouponSummary::from)
+                .collect(Collectors.toList());
+    }
 }

@@ -30,4 +30,22 @@ public class CouponLike {
 	@Builder.Default
 	@Column(name = "is_liked", nullable = false)
 	private Boolean isLiked = false;
+	public boolean isLiked() {
+		return Boolean.TRUE.equals(this.isLiked);
+	}
+
+	public void like() {
+		this.isLiked = true;
+	}
+
+	public static CouponLike create(Integer couponId, Integer userId, Integer brandId) {
+		return CouponLike.builder()
+				.couponId(couponId)
+				.userId(Long.valueOf(userId)) // 타입 불일치 방지
+				.brandId(brandId)
+				.isLiked(true)
+				.build();
+	}
+
 }
+

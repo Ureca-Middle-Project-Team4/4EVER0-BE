@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CouponLikeRepository extends JpaRepository<CouponLike, Integer> {
@@ -33,4 +34,6 @@ public interface CouponLikeRepository extends JpaRepository<CouponLike, Integer>
         ORDER BY cl.id DESC
     """)
 	List<LikedCouponDto> findLikedCouponsByUserId(@Param("userId") Long userId);
+
+	Optional<CouponLike> findByCouponIdAndUserId(Integer couponId, Long userId);
 }
