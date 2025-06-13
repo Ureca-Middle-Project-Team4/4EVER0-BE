@@ -31,6 +31,16 @@ public class Coupon {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    private int likes = 0;
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void increaseLikes() {
+        this.likes += 1;
+    }
+
     public enum DiscountType {
         PERCENT, FIXED
     }

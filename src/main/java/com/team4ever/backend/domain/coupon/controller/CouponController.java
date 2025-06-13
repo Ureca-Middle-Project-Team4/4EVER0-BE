@@ -1,9 +1,6 @@
 package com.team4ever.backend.domain.coupon.controller;
 
-import com.team4ever.backend.domain.coupon.dto.CouponClaimRequest;
-import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
+import com.team4ever.backend.domain.coupon.dto.*;
 import com.team4ever.backend.domain.coupon.service.CouponService;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
@@ -48,11 +45,6 @@ public class CouponController {
         return BaseResponse.success(response);
     }
 
-
-
-
-
-
     @Operation(summary = "특정 쿠폰 사용 처리")
     @PatchMapping("/{couponId}/use")
     public BaseResponse<CouponUseResponse> useCoupon(
@@ -84,6 +76,20 @@ public class CouponController {
         } catch (NumberFormatException e) {
             throw new IllegalStateException("'id' 속성의 형식이 올바르지 않습니다: " + idAttr);
         }
+    }
+
+    @Operation(summary = "쿠폰 좋아요")
+    @PostMapping("/{couponId}/like")
+    public BaseResponse<CouponLikeResponse> likeCoupon(@PathVariable Long couponId) {
+        CouponLikeResponse result = couponService.likeCoupon(couponId);
+        return BaseResponse.success(result);
+    }
+
+    @Operation(summary = "BEST 3 쿠폰 조회")
+    @GetMapping("/best")
+    public BaseResponse<List<CouponSummary>> getBestCoupons() {
+        List<CouponSummary> result = couponService.getBestCoupons();
+        return BaseResponse.success(result);
     }
 
 }

@@ -34,6 +34,7 @@ public enum ErrorCode {
 	COUPON_ALREADY_CLAIMED(HttpStatus.CONFLICT, "이미 발급된 쿠폰입니다."),
 	COUPON_NOT_CLAIMED(HttpStatus.NOT_FOUND, "발급된 쿠폰이 없습니다."),
 	COUPON_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 쿠폰입니다."),
+	COUPON_ALREADY_LIKED(HttpStatus.CONFLICT, "이미 좋아요를 누른 쿠폰입니다."),
 
 	// 위치 기반 API 에러
 	GEOLOCATION_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "위치 정보 조회 중 오류가 발생했습니다."),

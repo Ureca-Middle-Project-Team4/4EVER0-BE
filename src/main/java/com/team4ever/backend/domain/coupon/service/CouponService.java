@@ -1,9 +1,12 @@
 package com.team4ever.backend.domain.coupon.service;
 
 import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
+import com.team4ever.backend.domain.coupon.dto.CouponLikeResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
+import com.team4ever.backend.domain.coupon.entity.CouponLike;
 import com.team4ever.backend.domain.coupon.entity.UserCoupon;
+import com.team4ever.backend.domain.coupon.repository.CouponLikeRepository;
 import com.team4ever.backend.domain.coupon.repository.CouponRepository;
 import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
 import com.team4ever.backend.global.exception.CustomException;
@@ -22,6 +25,7 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final CouponLikeRepository couponLikeRepository;
 
     @Transactional(readOnly = true)
     public List<CouponResponse> getAllCoupons(Long userId) {
@@ -65,4 +69,21 @@ public class CouponService {
         uc.markAsUsed();
         return CouponUseResponse.from(uc);
     }
+    @Transactional
+    public CouponLikeResponse likeCoupon(Integer couponId, Integer userId, Integer brandId) {
+        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
+                .orElse(null);
+
+        if (like != null) {
+            if (like.isLiked()) {
+                throw new CustomException(ErrorCode.COUPON_ALREADY_LIKED);
+            }
+            like.like();
+        } else {
+            couponLikeRepository.save(CouponLike.create(couponId, userId, brandId));
+        }
+
+        return new CouponLikeResponse(true, Long.valueOf(couponId));
+    }
+
 }
