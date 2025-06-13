@@ -42,34 +42,43 @@ public class UBTIService {
 		this.objectMapper = objectMapper;
 	}
 
+	/**
+	 * UBTI 질문 스트리밍
+	 */
 	public Flux<ServerSentEvent<String>> nextQuestionStream(UBTIRequest req) {
+		log.info("FastAPI UBTI 질문 호출 - session_id: {}, tone: {}", req.getSession_id(), req.getTone());
+
 		return webClient.post()
 				.uri(questionPath)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.TEXT_EVENT_STREAM)
-				.bodyValue(req)
+				.bodyValue(req)  // tone 포함하여 전달
 				.retrieve()
 				.bodyToFlux(String.class)
 				.map(data -> ServerSentEvent.builder(data).build())
 				.doOnError(error -> log.error("UBTI 질문 스트리밍 오류: ", error));
 	}
 
-	// 최종 결과 조회 - data 필드 처리 수정
+	/**
+	 * UBTI 최종 결과 조회
+	 */
 	public Mono<BaseResponse<UBTIResult>> finalResultWrapped(UBTIRequest req) {
-		log.info("UBTI 결과 요청: session_id={}, message={}", req.getSession_id(), req.getMessage());
+		log.info("FastAPI UBTI 결과 호출 - session_id: {}, tone: {}", req.getSession_id(), req.getTone());
 
 		return webClient.post()
 				.uri(resultPath)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(req)
+				.bodyValue(req)  // tone 포함하여 전달
 				.retrieve()
 				.bodyToMono(String.class)
 				.doOnNext(rawResponse -> {
-					log.info("Python FastAPI 원본 응답: {}", rawResponse);
+					log.info("FastAPI UBTI 원본 응답 수신 - tone: {}", req.getTone());
+					log.debug("응답 내용: {}", rawResponse);
 				})
 				.flatMap(this::parseUBTIResult)
 				.map(data -> {
-					log.info("파싱된 UBTI 결과: {}", data);
+					log.info("UBTI 결과 파싱 성공 - ubti_type: {}",
+							data.getUbti_type() != null ? data.getUbti_type().getCode() : "null");
 					return BaseResponse.success(data);
 				})
 				.onErrorResume(WebClientResponseException.class, e -> {
@@ -86,18 +95,19 @@ public class UBTIService {
 				});
 	}
 
+	/**
+	 * FastAPI 응답 파싱 (기존 로직 유지)
+	 */
 	private Mono<UBTIResult> parseUBTIResult(String rawResponse) {
 		return Mono.fromCallable(() -> {
 			try {
-				log.debug("JSON 파싱 시작: {}", rawResponse);
+				log.debug("JSON 파싱 시작");
 
-				// 1. 전체 응답 파싱
 				JsonNode rootNode = objectMapper.readTree(rawResponse);
-				log.debug("파싱된 루트 노드: {}", rootNode);
+				log.debug("파싱된 루트 노드 구조 확인");
 
-				// 2. FastAPI BaseResponse 구조 확인
+				// FastAPI BaseResponse 구조 확인
 				if (rootNode.has("status") && rootNode.has("data")) {
-					// BaseResponse 래핑된 구조
 					int status = rootNode.get("status").asInt();
 					log.info("FastAPI 응답 상태: {}", status);
 
@@ -107,29 +117,24 @@ public class UBTIService {
 						throw new RuntimeException("FastAPI 에러: " + status + " - " + message);
 					}
 
-					// data 필드에서 실제 UBTI 결과 추출
 					JsonNode dataNode = rootNode.get("data");
 					if (dataNode == null || dataNode.isNull()) {
 						log.error("data 필드가 null입니다");
 						throw new RuntimeException("응답에 data 필드가 없습니다");
 					}
 
-					log.debug("추출된 데이터 노드: {}", dataNode);
 					return parseUBTIData(dataNode);
 				}
-				// 3. 직접 UBTI 결과 구조인 경우 (Python에서 직접 JSON 반환)
 				else if (rootNode.has("ubti_type")) {
 					log.info("직접 UBTI 결과 구조 감지");
 					return parseUBTIData(rootNode);
 				}
-				// 4. 에러 응답인 경우
 				else if (rootNode.has("error")) {
 					String errorType = rootNode.get("error").asText();
 					String errorMessage = rootNode.has("message") ? rootNode.get("message").asText() : "Unknown error";
-					log.error("Python에서 에러 응답: {} - {}", errorType, errorMessage);
-					throw new RuntimeException("Python API 에러: " + errorType + " - " + errorMessage);
+					log.error("FastAPI에서 에러 응답: {} - {}", errorType, errorMessage);
+					throw new RuntimeException("FastAPI 에러: " + errorType + " - " + errorMessage);
 				}
-				// 5. 알 수 없는 구조
 				else {
 					log.error("알 수 없는 응답 구조: {}", rootNode);
 					throw new RuntimeException("알 수 없는 응답 구조입니다");
@@ -146,9 +151,9 @@ public class UBTIService {
 	}
 
 	private UBTIResult parseUBTIData(JsonNode dataNode) throws JsonProcessingException {
-		log.debug("UBTI 데이터 파싱 시작: {}", dataNode);
+		log.debug("UBTI 데이터 파싱 시작");
 
-		// 1. 필수 필드 존재 확인
+		// 필수 필드 존재 확인
 		String[] requiredFields = {"ubti_type", "summary", "recommendation", "matching_type"};
 		for (String field : requiredFields) {
 			if (!dataNode.has(field) || dataNode.get(field).isNull()) {
@@ -157,7 +162,7 @@ public class UBTIService {
 			}
 		}
 
-		// 2. recommendation.plans 배열 확인
+		// recommendation.plans 배열 확인
 		JsonNode recommendation = dataNode.get("recommendation");
 		if (recommendation != null && recommendation.has("plans")) {
 			JsonNode plans = recommendation.get("plans");
@@ -171,7 +176,6 @@ public class UBTIService {
 			}
 		}
 
-		// 3. UBTIResult 객체로 변환
 		UBTIResult result = objectMapper.treeToValue(dataNode, UBTIResult.class);
 		log.info("UBTI 데이터 파싱 성공: ubti_type={}, plans_count={}",
 				result.getUbti_type() != null ? result.getUbti_type().getCode() : "null",

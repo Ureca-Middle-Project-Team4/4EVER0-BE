@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class ChatRequest {
-	@JsonProperty("session_id")
-	private String sessionId;
-
-	@JsonProperty("message")
+	private String session_id;
 	private String message;
+	private String tone = "general";  // 기본값: 일반 말투
 }
-
