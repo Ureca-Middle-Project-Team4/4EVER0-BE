@@ -106,7 +106,6 @@ springdoc:
     tagsSorter: alpha
     display-request-duration: true
 
-
 fastapi:
   chat:
     host: ${FASTAPI_HOST:localhost}
@@ -120,3 +119,7 @@ fastapi:
       question: /api/ubti/question
       result:   /api/ubti/result
 
+naver:
+  cloud:
+    access-key: ${NAVER_CLOUD_ACCESS_KEY}
+    secret-key: ${NAVER_CLOUD_SECRET_KEY}

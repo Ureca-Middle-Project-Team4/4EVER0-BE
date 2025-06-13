@@ -3,8 +3,22 @@ package com.team4ever.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
+@EnableJpaRepositories(
+		basePackages = {
+				"com.team4ever.backend.domain.common.brand",
+				"com.team4ever.backend.domain.plan.repository",
+				"com.team4ever.backend.domain.benefit.repository",
+				"com.team4ever.backend.domain.common.couponlike",
+				"com.team4ever.backend.domain.attendance.repository",
+				"com.team4ever.backend.domain.coupon.repository",
+				"com.team4ever.backend.domain.popups.repository",
+				"com.team4ever.backend.domain.subscriptions.repository",
+				"com.team4ever.backend.domain.user.repository",
+		}
+)
 public class BackendApplication {
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.configure().load();

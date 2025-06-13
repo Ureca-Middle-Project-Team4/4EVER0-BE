@@ -1,37 +1,76 @@
 package com.team4ever.backend.global.config;
 
+import com.team4ever.backend.global.security.JwtInterceptor; // [추가]
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    /**
-     * 2) 정적 리소스(Resource) 핸들러 설정
-     *    예시: /images/** 요청은 classpath:/static/images/ 폴더에서 찾기
-     */
+
+    private final JwtInterceptor jwtInterceptor;            // [추가]
+
+    public WebMvcConfig(JwtInterceptor jwtInterceptor) {    // [추가]
+        this.jwtInterceptor = jwtInterceptor;               // [추가]
+    }
+
+    @Bean
+    public CharacterEncodingFilter characterEncodingFilter() {
+        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
+        return filter;
+    }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
-
-        // (필요하다면 다른 리소스 경로도 여기에 추가)
-        // registry.addResourceHandler("/css/**")
-        //         .addResourceLocations("classpath:/static/css/");
     }
 
-    /**
-     * 3) 인터셉터(Interceptor) 등록
-     *    예시: MyInterceptor 를 /api/** 경로에 걸고 싶을 때
-     */
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.addPathPrefix("", c ->
+                !c.getPackageName().startsWith("org.springframework.web.servlet.resource"));
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // registry.addInterceptor(new MyInterceptor())
-        //         .addPathPatterns("/api/**")
-        //         .excludePathPatterns("/api/auth/**");
+        registry.addInterceptor(jwtInterceptor)
+                .excludePathPatterns(
+                        //REST API
+                        "/api/auth/**",
+                        "/api/refresh",
+                        "/api/plans",
+                        "/api/plans/**",
+                        "/api/subscriptions/main",
+                        "/api/subscriptions/brands",
+                        "/api/popups",
+                        "/api/popups/**",
+                        "/api/coupons",
+                        "/api/chat",
+                        "/api/coupons/**",
+                        "/api/user/coupons",
+                        //Swagger
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**"
+                );
     }
 
-    // 여기 아래에 addViewControllers, configureMessageConverters 등
-    // WebMvcConfigurer 에 다른 메서드를 추가해도 됩니다.
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+        converters.add(stringConverter);
+    }
 }
