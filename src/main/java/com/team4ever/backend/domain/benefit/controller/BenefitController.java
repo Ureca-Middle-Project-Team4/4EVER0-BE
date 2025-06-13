@@ -15,6 +15,8 @@ import java.util.List;
 import com.team4ever.backend.domain.benefit.dto.BenefitListByDateResponse;
 import com.team4ever.backend.domain.benefit.dto.BenefitListByDateResponse;
 import org.springframework.web.bind.annotation.PathVariable;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class BenefitController {
 
     private final BenefitService benefitService;
+
 
     @Operation(summary = "이번달 혜택 전체 조회")
     @GetMapping()
@@ -34,6 +37,7 @@ public class BenefitController {
     @GetMapping("/{date}")
     public BaseResponse<List<BenefitResponse>> getBenefitsByDate(@PathVariable String date) {
         return BaseResponse.success(benefitService.getBenefitsByDate(date));
+
     }
 
 }
