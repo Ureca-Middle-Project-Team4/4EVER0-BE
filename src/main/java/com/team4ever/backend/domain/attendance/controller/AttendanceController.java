@@ -24,13 +24,12 @@ public class AttendanceController {
     @Operation(summary = "내 연속 출석 일수 조회")
     @GetMapping("/streak")
     public BaseResponse<Integer> getStreak(@RequestParam Long userId) {
-        return BaseResponse.success(attendanceService.getStreak(userId));
+        return BaseResponse.success(attendanceService.getCurrentStreak(userId));
     }
 
-    @Operation(summary = "내 연속 출석률 조회")
-    @GetMapping("/rate")
-    public BaseResponse<Double> getRate(@RequestParam Long userId) {
-        double rate = attendanceService.calculateStreak(userId);
-        return BaseResponse.success(rate);
+    @Operation(summary = "오늘 출석 여부 확인")
+    @GetMapping("/today")
+    public BaseResponse<Boolean> isAttendedToday(@RequestParam Long userId) {
+        return BaseResponse.success(attendanceService.isAttendedToday(userId));
     }
 }
