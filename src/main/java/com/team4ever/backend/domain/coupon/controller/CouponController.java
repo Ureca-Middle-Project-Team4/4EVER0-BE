@@ -79,7 +79,7 @@ public class CouponController {
             @AuthenticationPrincipal OAuth2User oAuth2User
     ) {
         Long userId = extractUserId(oAuth2User);
-        Integer brandId = 1; // TODO: 브랜드 ID 동적 처리 필요 시 수정
+        Integer brandId = 1; // 브랜드 ID 동적 처리 필요 시 수정
         return BaseResponse.success(likeCoupon(couponId, userId.intValue(), brandId));
     }
 
