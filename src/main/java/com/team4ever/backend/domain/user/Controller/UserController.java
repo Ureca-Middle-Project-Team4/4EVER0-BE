@@ -32,12 +32,10 @@ public class UserController {
         return ResponseEntity.ok(id);
     }
 
-    // userId로 회원 정보 조회
+    // user jwt로 회원 정보 조회
     @GetMapping
-    public ResponseEntity<UserResponse> getUser(
-            @RequestParam("userId") String userId
-    ) {
-        UserResponse dto = svc.getUserByUserId(userId);
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        UserResponse dto = svc.getCurrentUser();
         return ResponseEntity.ok(dto);
     }
 
