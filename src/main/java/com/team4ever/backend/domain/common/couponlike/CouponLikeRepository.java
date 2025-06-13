@@ -35,5 +35,20 @@ public interface CouponLikeRepository extends JpaRepository<CouponLike, Integer>
     """)
 	List<LikedCouponDto> findLikedCouponsByUserId(@Param("userId") Long userId);
 
+	/**
+	 * isLiked 여부와 상관없이 사용자와 쿠폰으로 좋아요 엔티티 조회
+	 */
 	Optional<CouponLike> findByCouponIdAndUserId(Integer couponId, Long userId);
+
+	/**
+	 * 현재 좋아요 중인 상태인지 확인 (isLiked=true만 조회)
+	 */
+	@Query("""
+    SELECT cl FROM CouponLike cl
+    WHERE cl.couponId = :couponId
+      AND cl.userId = :userId
+      AND cl.isLiked = true
+""")
+	Optional<CouponLike> findActiveLike(@Param("couponId") Integer couponId, @Param("userId") Long userId);
+
 }

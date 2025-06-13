@@ -10,6 +10,10 @@ import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,9 +36,7 @@ public class CouponController {
     @Operation(summary = "전체 쿠폰 조회")
     @GetMapping
     public BaseResponse<List<CouponResponse>> getAllCoupons() {
-        return BaseResponse.success(
-                couponService.getAllCoupons(null)
-        );
+        return BaseResponse.success(couponService.getAllCoupons(null));
     }
 
     @Operation(summary = "특정 쿠폰 발급 요청")
@@ -42,11 +45,7 @@ public class CouponController {
             @PathVariable Integer couponId,
             @AuthenticationPrincipal OAuth2User oAuth2User
     ) {
-        if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        Long userId = Long.valueOf(oAuth2User.getAttribute("id").toString());
+        Long userId = extractUserId(oAuth2User);
         CouponClaimResponse response = couponService.claimCoupon(userId, couponId);
         return BaseResponse.success(response);
     }
@@ -57,30 +56,45 @@ public class CouponController {
             @PathVariable Integer couponId,
             @AuthenticationPrincipal OAuth2User oauth2User
     ) {
-        if (oauth2User == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        Object idAttr = oauth2User.getAttribute("id");
-        if (idAttr == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        Long userId = Long.valueOf(idAttr.toString());
-        return BaseResponse.success(
-                couponService.useCoupon(userId, couponId)
-        );
+        Long userId = extractUserId(oauth2User);
+        return BaseResponse.success(couponService.useCoupon(userId, couponId));
     }
 
-    @Operation(summary = "쿠폰 좋아요 등록")
+    @Operation(summary = "쿠폰 좋아요 등록", responses = {
+            @ApiResponse(responseCode = "200", description = "좋아요 등록 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CouponLikeResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 200,
+                                  "message": "좋아요가 등록되었습니다.",
+                                  "data": {
+                                    "liked": true,
+                                    "coupon_id": 42
+                                  }
+                                }
+                            """)
+                    )
+            )
+    })
     @PostMapping("/{couponId}/like")
     public BaseResponse<CouponLikeResponse> likeCouponApi(
             @PathVariable Integer couponId,
             @AuthenticationPrincipal OAuth2User oAuth2User
     ) {
         Long userId = extractUserId(oAuth2User);
-        Integer brandId = 1; // 브랜드 ID 동적 처리 필요 시 수정
-        return BaseResponse.success(likeCoupon(couponId, userId.intValue(), brandId));
+
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
+        Integer brandId = coupon.getBrand().getId();
+
+        CouponLikeResponse result = likeCoupon(couponId, userId.intValue(), brandId);
+        String message = result.isLiked()
+                ? "좋아요가 등록되었습니다."
+                : "좋아요가 취소되었습니다.";
+
+        return new BaseResponse<>(200, message, result);
     }
 
     @Operation(summary = "좋아요 많은 BEST 쿠폰 Top3 조회")
@@ -103,20 +117,27 @@ public class CouponController {
 
     @Transactional
     public CouponLikeResponse likeCoupon(Integer couponId, Integer userId, Integer brandId) {
-        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId.longValue())
-                .orElse(null);
+        Long userIdLong = userId.longValue();
 
-        if (like != null) {
-            if (like.isLiked()) {
-                throw new CustomException(ErrorCode.COUPON_ALREADY_LIKED);
-            }
-            like.like();
+        // 좋아요 존재 여부 확인 (isLiked=true만 해당)
+        Optional<CouponLike> existingLikeOpt = couponLikeRepository.findActiveLike(couponId, userIdLong);
+
+        boolean isLiked;
+
+        if (existingLikeOpt.isPresent()) {
+            // 이미 좋아요 상태면 삭제 (좋아요 취소)
+            couponLikeRepository.delete(existingLikeOpt.get());
+            isLiked = false;
         } else {
-            couponLikeRepository.save(CouponLike.create(couponId, userId, brandId));
+            // 없으면 새로 좋아요 생성
+            CouponLike newLike = CouponLike.create(couponId, userId, brandId);
+            couponLikeRepository.save(newLike);
+            isLiked = true;
         }
 
-        return new CouponLikeResponse(true, Long.valueOf(couponId));
+        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
     }
+
 
     @Transactional(readOnly = true)
     public List<CouponSummary> getBestCoupons() {

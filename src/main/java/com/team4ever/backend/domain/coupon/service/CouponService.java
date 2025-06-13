@@ -73,16 +73,18 @@ public class CouponService {
         CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
                 .orElse(null);
 
+        boolean isLiked;
+
         if (like != null) {
-            if (like.isLiked()) {
-                throw new CustomException(ErrorCode.COUPON_ALREADY_LIKED);
-            }
-            like.like();
+            like.toggle();
+            couponLikeRepository.save(like); // save() 호출
+            isLiked = like.isLiked();
         } else {
             couponLikeRepository.save(CouponLike.create(couponId, userId.intValue(), brandId));
+            isLiked = true;
         }
 
-        return new CouponLikeResponse(true, Long.valueOf(couponId));
+        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
     }
 
     @Transactional(readOnly = true)
