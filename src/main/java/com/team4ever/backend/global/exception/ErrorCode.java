@@ -13,6 +13,13 @@ public enum ErrorCode {
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
 	INVALID_USER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자 ID입니다."),
 
+	// 요금제 관련 에러
+	PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "요금제를 찾을 수 없습니다."),
+	PLAN_ALREADY_USING(HttpStatus.CONFLICT, "이미 사용 중인 요금제입니다."),
+	PLAN_CHANGE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "요금제 변경 중 오류가 발생했습니다."),
+	PLAN_CANCEL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "요금제 해지 중 오류가 발생했습니다."),
+	INVALID_PLAN_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 요금제 요청입니다."),
+
 	// 구독 관련 에러
 	SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID의 구독 상품을 찾을 수 없습니다."),
 	BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID의 브랜드를 찾을 수 없습니다."),
@@ -28,9 +35,14 @@ public enum ErrorCode {
 	COUPON_NOT_CLAIMED(HttpStatus.NOT_FOUND, "발급된 쿠폰이 없습니다."),
 	COUPON_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 쿠폰입니다."),
 
+	// 위치 기반 API 에러
+	GEOLOCATION_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "위치 정보 조회 중 오류가 발생했습니다."),
+
 	// 팝업스토어 전용 에러
 	POPUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID의 팝업스토어가 없습니다."),
 	POPUP_ACCESS_DENIED(HttpStatus.FORBIDDEN, "팝업스토어 조회 권한이 없습니다.");
+
+
 
 	private final HttpStatus status;
 	private final String message;
