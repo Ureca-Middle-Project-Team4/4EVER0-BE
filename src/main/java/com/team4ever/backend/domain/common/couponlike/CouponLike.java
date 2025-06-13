@@ -27,6 +27,7 @@ public class CouponLike {
 	@Column(name = "brand_id", nullable = false)
 	private Integer brandId;
 
+	@Builder.Default
 	@Column(name = "is_liked", nullable = false)
 	private Boolean isLiked = false;
 }

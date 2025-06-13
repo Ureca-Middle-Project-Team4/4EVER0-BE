@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
 
-
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -86,9 +85,4 @@ public class UserController {
         UserCouponListResponse response = svc.getMyCoupons(oauthUserId);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
-
-
-
-
-
 }

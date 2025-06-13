@@ -9,7 +9,8 @@ import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
 
 public interface UserService {
 	Long createUser(CreateUserRequest req);
-	UserResponse getUserByUserId(String userId);
+	UserResponse getUserByUserId(String oauthId);
+	UserResponse getCurrentUser();
 	UserSubscriptionListResponse getUserSubscriptions(String oauthUserId);
     LikedCouponsResponse getLikedCoupons(String oauthUserId);
 	UserCouponListResponse getMyCoupons(String oauthUserId);

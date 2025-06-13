@@ -7,6 +7,7 @@ import com.team4ever.backend.domain.plan.service.PlanService;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,9 +23,7 @@ public class PlanController {
 
 	private final PlanService planService;
 
-	/**
-	 * 내가 사용중인 요금제 조회
-	 */
+	@Operation(summary = "내가 사용중인 요금제 조회")
 	@GetMapping
 	public ResponseEntity<BaseResponse<PlanResponse>> getCurrentPlan(
 			@AuthenticationPrincipal OAuth2User oAuth2User
@@ -38,9 +37,8 @@ public class PlanController {
 
 		return ResponseEntity.ok(BaseResponse.success(response));
 	}
-	/**
-	 * 요금제 변경
-	 */
+
+	@Operation(summary = "요금제 변경")
 	@PostMapping
 	public ResponseEntity<BaseResponse<PlanChangeResponse>> changePlan(
 			@Valid @RequestBody PlanChangeRequest request,
@@ -56,9 +54,7 @@ public class PlanController {
 		return ResponseEntity.ok(BaseResponse.success(response));
 	}
 
-	/**
-	 * 요금제 해지
-	 */
+	@Operation(summary = "요금제 해지")
 	@DeleteMapping
 	public ResponseEntity<BaseResponse<PlanChangeResponse>> cancelPlan(
 			@AuthenticationPrincipal OAuth2User oAuth2User

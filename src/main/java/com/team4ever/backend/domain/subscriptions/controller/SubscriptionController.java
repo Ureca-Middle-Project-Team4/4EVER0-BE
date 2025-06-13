@@ -5,6 +5,7 @@ import com.team4ever.backend.domain.subscriptions.service.SubscriptionService;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,9 +24,7 @@ public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
 
-	/**
-	 * 메인 구독 상품 조회
-	 */
+	@Operation(summary = "메인 구독 상품 전체 조회")
 	@GetMapping("/main")
 	public ResponseEntity<BaseResponse<List<SubscriptionResponse>>> getMainSubscriptions() {
 		return ResponseEntity.ok(success(
@@ -33,9 +32,7 @@ public class SubscriptionController {
 		));
 	}
 
-	/**
-	 * 라이프 구독 브랜드 조회 (전체 or 카테고리별)
-	 */
+	@Operation(summary = "라이프 구독 브랜드 조회 (전체 or 카테고리별)")
 	@GetMapping("/brands")
 	public ResponseEntity<BaseResponse<List<BrandResponse>>> getLifeSubscriptionBrands(
 			@RequestParam(required = false) String category) {
@@ -51,9 +48,7 @@ public class SubscriptionController {
 	}
 
 
-	/**
-	 * 구독 가입
-	 */
+	@Operation(summary = "구독 상품 가입")
 	@PostMapping("/subscribe")
 	public ResponseEntity<BaseResponse<SubscribeResponse>> subscribe(
 			@RequestBody SubscribeRequest request,
@@ -71,9 +66,7 @@ public class SubscriptionController {
 	}
 
 
-	/**
-	 * 구독 해지
-	 */
+	@Operation(summary = "구독 상품 해지")
 	@DeleteMapping("/unsubscribe")
 	public ResponseEntity<BaseResponse<UnsubscribeResponse>> unsubscribe(
 			@RequestBody UnsubscribeRequest request,
