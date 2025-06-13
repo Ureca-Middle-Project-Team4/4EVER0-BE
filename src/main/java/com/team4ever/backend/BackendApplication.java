@@ -17,6 +17,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 				"com.team4ever.backend.domain.popups.repository",
 				"com.team4ever.backend.domain.subscriptions.repository",
 				"com.team4ever.backend.domain.user.repository",
+				"com.team4ever.backend.domain.mission.repository",
 		}
 )
 public class BackendApplication {

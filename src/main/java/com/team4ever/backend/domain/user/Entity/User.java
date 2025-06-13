@@ -38,4 +38,10 @@ public class User {
 
     @Column(nullable = false)
     private Integer point;
+
+    // User.java에 추가
+    public void addPoint(int points) {
+        this.point += points;   // 현재 보유 포인트에 새 포인트 추가
+    }
 }
+
