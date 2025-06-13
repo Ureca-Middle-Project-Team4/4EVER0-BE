@@ -35,9 +35,14 @@ public enum ErrorCode {
 	COUPON_NOT_CLAIMED(HttpStatus.NOT_FOUND, "발급된 쿠폰이 없습니다."),
 	COUPON_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 쿠폰입니다."),
 
+	// 위치 기반 API 에러
+	GEOLOCATION_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "위치 정보 조회 중 오류가 발생했습니다."),
+
 	// 팝업스토어 전용 에러
 	POPUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID의 팝업스토어가 없습니다."),
 	POPUP_ACCESS_DENIED(HttpStatus.FORBIDDEN, "팝업스토어 조회 권한이 없습니다.");
+
+
 
 	private final HttpStatus status;
 	private final String message;
