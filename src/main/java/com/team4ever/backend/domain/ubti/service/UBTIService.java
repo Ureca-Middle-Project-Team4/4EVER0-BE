@@ -17,6 +17,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Set;
+
 @Slf4j
 @Service
 public class UBTIService {
@@ -25,6 +27,10 @@ public class UBTIService {
 	private final String questionPath;
 	private final String resultPath;
 	private final ObjectMapper objectMapper;
+
+	// 유효한 톤 목록 상수
+	private static final Set<String> VALID_TONES = Set.of("general", "muneoz");
+	private static final String DEFAULT_TONE = "general";
 
 	public UBTIService(
 			WebClient.Builder webClientBuilder,
@@ -46,13 +52,18 @@ public class UBTIService {
 	 * UBTI 질문 스트리밍
 	 */
 	public Flux<ServerSentEvent<String>> nextQuestionStream(UBTIRequest req) {
-		log.info("FastAPI UBTI 질문 호출 - session_id: {}, tone: {}", req.getSession_id(), req.getTone());
+		// 톤 검증 및 정규화
+		String validatedTone = validateAndNormalizeTone(req.getTone());
+		req.setTone(validatedTone);
+
+		log.info("FastAPI UBTI 질문 호출 - session_id: {}, tone: {} (검증됨)",
+				req.getSession_id(), validatedTone);
 
 		return webClient.post()
 				.uri(questionPath)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.TEXT_EVENT_STREAM)
-				.bodyValue(req)  // tone 포함하여 전달
+				.bodyValue(req)  // 검증된 tone 포함하여 전달
 				.retrieve()
 				.bodyToFlux(String.class)
 				.map(data -> ServerSentEvent.builder(data).build())
@@ -63,16 +74,21 @@ public class UBTIService {
 	 * UBTI 최종 결과 조회
 	 */
 	public Mono<BaseResponse<UBTIResult>> finalResultWrapped(UBTIRequest req) {
-		log.info("FastAPI UBTI 결과 호출 - session_id: {}, tone: {}", req.getSession_id(), req.getTone());
+		// 톤 검증 및 정규화
+		String validatedTone = validateAndNormalizeTone(req.getTone());
+		req.setTone(validatedTone);
+
+		log.info("FastAPI UBTI 결과 호출 - session_id: {}, tone: {} (검증됨)",
+				req.getSession_id(), validatedTone);
 
 		return webClient.post()
 				.uri(resultPath)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(req)  // tone 포함하여 전달
+				.bodyValue(req)  // 검증된 tone 포함하여 전달
 				.retrieve()
 				.bodyToMono(String.class)
 				.doOnNext(rawResponse -> {
-					log.info("FastAPI UBTI 원본 응답 수신 - tone: {}", req.getTone());
+					log.info("FastAPI UBTI 원본 응답 수신 - tone: {}", validatedTone);
 					log.debug("응답 내용: {}", rawResponse);
 				})
 				.flatMap(this::parseUBTIResult)
@@ -93,6 +109,27 @@ public class UBTIService {
 					log.error("UBTI 결과 처리 중 예상치 못한 오류: ", e);
 					return Mono.just(BaseResponse.error(ErrorCode.UBTI_GENERATION_FAILED));
 				});
+	}
+
+	/**
+	 * tone 파라미터 검증 및 정규화
+	 * @param tone 입력받은 톤
+	 * @return 검증된 톤 (잘못된 경우 기본값 반환)
+	 */
+	private String validateAndNormalizeTone(String tone) {
+		if (tone == null || tone.trim().isEmpty()) {
+			log.info("UBTI 톤이 null/empty - 기본값 '{}' 적용", DEFAULT_TONE);
+			return DEFAULT_TONE;
+		}
+
+		String normalizedTone = tone.trim().toLowerCase();
+		if (VALID_TONES.contains(normalizedTone)) {
+			log.debug("UBTI 유효한 톤 사용: {}", normalizedTone);
+			return normalizedTone;
+		} else {
+			log.warn("UBTI 잘못된 톤 '{}' - 기본값 '{}' 적용", tone, DEFAULT_TONE);
+			return DEFAULT_TONE;
+		}
 	}
 
 	/**
