@@ -1,6 +1,7 @@
 package com.team4ever.backend.global.controller;
 
 import com.team4ever.backend.global.security.*;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.*;
@@ -21,11 +22,13 @@ public class JwtTokenController {
         this.redisService = redisService;
     }
 
+    @Operation(summary = "로그인")
     @GetMapping("/auth/{provider}")
     public void login(@PathVariable String provider, HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/" + provider);
     }
 
+    @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam String userId,
                                     HttpServletResponse response) {
@@ -45,6 +48,7 @@ public class JwtTokenController {
         return ResponseEntity.ok().body("Logged out");
     }
 
+    @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh")
     public ResponseEntity<Void> refresh(@RequestParam String userId,
                                         HttpServletResponse response) {
