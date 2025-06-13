@@ -35,6 +35,14 @@ public enum ErrorCode {
 	COUPON_NOT_CLAIMED(HttpStatus.NOT_FOUND, "발급된 쿠폰이 없습니다."),
 	COUPON_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 쿠폰입니다."),
 
+	// UBTI 관련 에러
+	UBTI_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "UBTI 타입 데이터를 찾을 수 없습니다."),
+	UBTI_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UBTI 결과 생성 중 오류가 발생했습니다."),
+	UBTI_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 UBTI 요청입니다."),
+	UBTI_AI_API_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 서비스 연결 오류가 발생했습니다."),
+	UBTI_JSON_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "UBTI 결과 파싱 중 오류가 발생했습니다."),
+	UBTI_PROMPT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "UBTI 프롬프트 생성 중 오류가 발생했습니다."),
+	UBTI_DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "UBTI 데이터베이스 연결 오류가 발생했습니다."),
 	// 위치 기반 API 에러
 	GEOLOCATION_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "위치 정보 조회 중 오류가 발생했습니다."),
 
