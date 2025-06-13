@@ -15,6 +15,6 @@ public interface UserCouponRepository extends JpaRepository<UserCoupon, Integer>
     boolean existsByUserIdAndCouponId(Long userId, Integer couponId);
 
     // 사용자별 전체 쿠폰 조회 (isUsed 상태 확인)
-    @EntityGraph(attributePaths = "coupon")
+    @EntityGraph(attributePaths = {"coupon", "coupon.brand"})
     List<UserCoupon> findByUserId(Long userId);
 }

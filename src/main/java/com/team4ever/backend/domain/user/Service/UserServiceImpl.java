@@ -10,6 +10,7 @@ import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import com.team4ever.backend.domain.subscriptions.repository.UserSubscriptionCombinationRepository;
+import com.team4ever.backend.domain.coupon.repository.UserCouponRepository;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import java.util.List;
+import com.team4ever.backend.domain.coupon.entity.UserCoupon;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -27,17 +31,20 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repo;
     private final UserSubscriptionCombinationRepository userSubscriptionCombinationRepository;
     private final CouponLikeRepository couponLikeRepository;
+    private final UserCouponRepository userCouponRepository;
     private final JwtTokenProvider jwtProvider;
     private final HttpServletRequest request;
 
-
     public UserServiceImpl(UserRepository repo,
                            UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
-                           CouponLikeRepository couponLikeRepository, JwtTokenProvider jwtProvider,
+                           CouponLikeRepository couponLikeRepository,
+                           UserCouponRepository userCouponRepository,
+                           JwtTokenProvider jwtProvider,
                            HttpServletRequest request) {
         this.repo = repo;
         this.userSubscriptionCombinationRepository = userSubscriptionCombinationRepository;
         this.couponLikeRepository = couponLikeRepository;
+        this.userCouponRepository = userCouponRepository;
         this.jwtProvider = jwtProvider;
         this.request = request;
     }
@@ -82,7 +89,6 @@ public class UserServiceImpl implements UserService {
                 .point(u.getPoint())
                 .build();
     }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -186,6 +192,41 @@ public class UserServiceImpl implements UserService {
             throw e;
         } catch (Exception e) {
             log.error("사용자 좋아요 쿠폰 목록 조회 중 예상치 못한 오류 발생", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //보유 쿠폰 조회
+    @Override
+    @Transactional(readOnly = true)
+    public UserCouponListResponse getMyCoupons(String oauthUserId) {
+        try {
+            log.info("보유 쿠폰 조회 시작 - oauthUserId: {}", oauthUserId);
+
+            User user = repo.findByUserId(oauthUserId)
+                    .orElseThrow(() -> {
+                        log.error("사용자를 찾을 수 없음: {}", oauthUserId);
+                        return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    });
+
+            List<UserCoupon> userCoupons = userCouponRepository.findByUserId(user.getId());
+
+            List<CouponInfoResponse> couponDtos = userCoupons.stream()
+                    .map(uc -> new CouponInfoResponse(
+                            uc.getCoupon().getId().longValue(),
+                            uc.getCoupon().getTitle(),
+                            new CouponInfoResponse.BrandInfo(
+                                    uc.getCoupon().getBrand().getId().longValue(),
+                                    uc.getCoupon().getBrand().getName(),
+                                    uc.getCoupon().getBrand().getImageUrl()
+                            ),
+                            uc.getIsUsed()
+                    ))
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            return new UserCouponListResponse(couponDtos);
+        } catch (Exception e) {
+            log.error("보유 쿠폰 조회 중 오류 발생", e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
