@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
-
+import com.team4ever.backend.domain.benefit.dto.BenefitListByDateResponse;
+import com.team4ever.backend.domain.benefit.dto.BenefitListByDateResponse;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,19 +24,16 @@ public class BenefitController {
 
     private final BenefitService benefitService;
 
-    @GetMapping
-    public BaseResponse<List<BenefitResponse>> getAllBenefits() {
-        return BaseResponse.success(benefitService.getAllBenefits());
+    @Operation(summary = "이번달 혜택 전체 조회")
+    @GetMapping()
+    public BaseResponse<List<BenefitResponse>> getMonthlyBenefits() {
+        return BaseResponse.success(benefitService.getMonthlyBenefits());
     }
 
-    @Operation(summary = "특정 날짜 혜택 조회", description = "YYYY-MM-DD")
-    @GetMapping("/by-date")
-    public BaseResponse<List<BenefitResponse>> getBenefitsBySpecificDate(
-            @Parameter(description = "조회할 날짜 (YYYY-MM-DD)", example = "2025-06-12")
-            @RequestParam String date
-    ) {
-        LocalDate parsedDate = LocalDate.parse(date);
-        return BaseResponse.success(benefitService.getBenefitsByDate(parsedDate));
+    @Operation(summary = "특정 날짜 혜택 조회", description = "YYYY-MM-DD 형식의 날짜로 혜택을 조회합니다")
+    @GetMapping("/{date}")
+    public BaseResponse<List<BenefitResponse>> getBenefitsByDate(@PathVariable String date) {
+        return BaseResponse.success(benefitService.getBenefitsByDate(date));
     }
 
 }
