@@ -13,6 +13,6 @@ public class BenefitResponse {
     private LocalDate date;
 
     public static BenefitResponse from(Benefit benefit) {
-        return new BenefitResponse(benefit.getBrand(), benefit.getDate());
+        return new BenefitResponse(benefit.getBrand().getName(), benefit.getBenefitDate());
     }
 }

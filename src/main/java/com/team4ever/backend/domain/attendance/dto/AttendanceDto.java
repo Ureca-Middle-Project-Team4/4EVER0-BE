@@ -21,5 +21,4 @@ public class AttendanceDto {
           entity.getId(), entity.getUserId(), entity.getCheckedDate()
         );
     }
-
 }
