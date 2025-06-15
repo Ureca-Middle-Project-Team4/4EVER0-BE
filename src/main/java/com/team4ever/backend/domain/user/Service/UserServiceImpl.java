@@ -95,18 +95,41 @@ public class UserServiceImpl implements UserService {
     public UserResponse getCurrentUser() {
         // 1) 쿠키에서 토큰 꺼내기
         Cookie cookie = WebUtils.getCookie(request, "ACCESS_TOKEN");
-        if (cookie == null || !jwtProvider.validateToken(cookie.getValue())) {
+        if (cookie == null) {
+            log.warn("[getCurrentUser] ACCESS_TOKEN 쿠키 없음");
             throw new IllegalStateException("유효한 ACCESS_TOKEN이 필요합니다.");
+        } else {
+            log.info("[getCurrentUser] ACCESS_TOKEN 쿠키 존재: {}", cookie.getValue());
         }
 
-        // 2) 토큰에서 userId 추출
-        String userId = jwtProvider.getUserId(cookie.getValue());
+        // 2) 토큰 유효성 검증
+        if (!jwtProvider.validateToken(cookie.getValue())) {
+            log.warn("[getCurrentUser] ACCESS_TOKEN 토큰 검증 실패. 값: {}", cookie.getValue());
+            throw new IllegalStateException("유효한 ACCESS_TOKEN이 필요합니다.");
+        } else {
+            log.info("[getCurrentUser] ACCESS_TOKEN 토큰 유효성 검증 성공");
+        }
 
-        // 3) DB에서 조회
+        // 3) 토큰에서 userId 추출
+        String userId = null;
+        try {
+            userId = jwtProvider.getUserId(cookie.getValue());
+            log.info("[getCurrentUser] userId 추출 성공: {}", userId);
+        } catch (Exception e) {
+            log.error("[getCurrentUser] userId 추출 실패", e);
+            throw new IllegalStateException("토큰에서 userId를 추출할 수 없습니다.");
+        }
+
+        // 4) DB에서 조회
+        String finalUserId = userId;
         User u = repo.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 userId를 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.warn("[getCurrentUser] DB에서 userId({}) 조회 실패", finalUserId);
+                    return new IllegalArgumentException("해당 userId를 찾을 수 없습니다.");
+                });
 
-        // 4) DTO 변환
+        // 5) DTO 변환
+        log.info("[getCurrentUser] User 정보 반환: id={}, userId={}", u.getId(), u.getUserId());
         return UserResponse.builder()
                 .id(u.getId())
                 .planId(u.getPlanId())
