@@ -78,24 +78,25 @@ public class CouponController {
                     )
             )
     })
+//
     @PostMapping("/{couponId}/like")
-    public BaseResponse<CouponLikeResponse> likeCouponApi(
+    public BaseResponse<CouponLikeResponse> likeCoupon(
             @PathVariable Integer couponId,
-            @AuthenticationPrincipal OAuth2User oAuth2User
-    ) {
-        Long userId = extractUserId(oAuth2User);
+            @RequestHeader(value = "X-USER-ID", required = false) Long testUserId,
+            @RequestHeader(value = "X-BRAND-ID", required = false) Integer testBrandId,
+            @AuthenticationPrincipal OAuth2User oauth2User) {
 
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
-        Integer brandId = coupon.getBrand().getId();
+        Long userId = (oauth2User != null) ? Long.valueOf(oauth2User.getAttribute("id")) : testUserId;
+        Integer brandId = (oauth2User != null) ? oauth2User.getAttribute("brandId") : testBrandId;
 
-        CouponLikeResponse result = likeCoupon(couponId, userId.intValue(), brandId);
-        String message = result.isLiked()
-                ? "좋아요가 등록되었습니다."
-                : "좋아요가 취소되었습니다.";
+        if (userId == null || brandId == null) {
+            throw new IllegalStateException("유효한 ACCESS_TOKEN이 필요하거나 테스트 헤더가 필요합니다.");
+        }
 
-        return new BaseResponse<>(200, message, result);
+        CouponLikeResponse result = couponService.likeCoupon(couponId, userId, brandId);
+        return BaseResponse.success(result);
     }
+
 
     @Operation(summary = "좋아요 많은 BEST 쿠폰 Top3 조회")
     @GetMapping("/best")

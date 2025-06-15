@@ -68,24 +68,55 @@ public class CouponService {
         return CouponUseResponse.from(uc);
     }
 
-    @Transactional
-    public CouponLikeResponse likeCoupon(Integer couponId, Long userId, Integer brandId) {
-        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
-                .orElse(null);
+//    @Transactional
+//    public CouponLikeResponse likeCoupon(Integer couponId, Long userId, Integer brandId) {
+//        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
+//                .orElse(null);
+//
+//        boolean isLiked;
+//
+//        if (like != null) {
+//            like.toggle();
+//            couponLikeRepository.save(like); // save() 호출
+//            isLiked = like.isLiked();
+//        } else {
+//            couponLikeRepository.save(CouponLike.create(couponId, userId.intValue(), brandId));
+//            isLiked = true;
+//        }
+//
+//        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
+//    }
 
-        boolean isLiked;
+@Transactional
+public CouponLikeResponse likeCoupon(Integer couponId, Long userId, Integer brandId) {
+    System.out.println("👉 likeCoupon 실행됨: couponId=" + couponId + ", userId=" + userId + ", brandId=" + brandId);
 
-        if (like != null) {
-            like.toggle();
-            couponLikeRepository.save(like); // save() 호출
-            isLiked = like.isLiked();
-        } else {
-            couponLikeRepository.save(CouponLike.create(couponId, userId.intValue(), brandId));
-            isLiked = true;
+    CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
+            .orElse(null);
+
+    System.out.println("👉 기존 좋아요 여부: " + (like != null ? like.isLiked() : "없음"));
+
+    boolean isLiked;
+
+    if (like != null) {
+        like.toggle();  // 여기가 NPE 가능성 있음
+        couponLikeRepository.save(like);
+        isLiked = like.isLiked();
+        System.out.println("✅ 좋아요 토글 후 상태: " + isLiked);
+    } else {
+        if (brandId == null) {
+            System.out.println("❌ brandId가 null이야! create()에서 터질 수 있음");
         }
 
-        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
+        CouponLike newLike = CouponLike.create(couponId, userId.intValue(), brandId);  // ← 여기도 NPE 가능성
+        couponLikeRepository.save(newLike);
+        isLiked = true;
+        System.out.println("✅ 좋아요 신규 등록 완료");
     }
+
+    return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
+}
+
 
     @Transactional(readOnly = true)
     public List<CouponSummary> getBestCoupons() {
