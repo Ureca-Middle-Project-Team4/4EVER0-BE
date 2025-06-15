@@ -1,150 +1,230 @@
 package com.team4ever.backend.domain.coupon.controller;
 
-import com.team4ever.backend.domain.common.couponlike.CouponLike;
-import com.team4ever.backend.domain.common.couponlike.CouponLikeRepository;
-import com.team4ever.backend.domain.coupon.dto.*;
-import com.team4ever.backend.domain.coupon.entity.Coupon;
-import com.team4ever.backend.domain.coupon.repository.CouponRepository;
+import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
+import com.team4ever.backend.domain.coupon.dto.CouponResponse;
+import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
 import com.team4ever.backend.domain.coupon.service.CouponService;
-import com.team4ever.backend.global.exception.CustomException;
-import com.team4ever.backend.global.exception.ErrorCode;
+import com.team4ever.backend.domain.user.Entity.User;
+import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/coupons")
 @RequiredArgsConstructor
+@Tag(name = "쿠폰 API", description = "쿠폰 조회, 발급, 사용 관련 API")
 public class CouponController {
 
     private final CouponService couponService;
-    private final CouponLikeRepository couponLikeRepository;
-    private final CouponRepository couponRepository;
+    private final UserRepository userRepository;
 
-    @Operation(summary = "전체 쿠폰 조회")
-    @GetMapping
-    public BaseResponse<List<CouponResponse>> getAllCoupons() {
-        return BaseResponse.success(couponService.getAllCoupons(null));
-    }
-
-    @Operation(summary = "특정 쿠폰 발급 요청")
-    @PostMapping("/{couponId}/claim")
-    public BaseResponse<CouponClaimResponse> claimCoupon(
-            @PathVariable Integer couponId,
-            @AuthenticationPrincipal OAuth2User oAuth2User
-    ) {
-        Long userId = extractUserId(oAuth2User);
-        CouponClaimResponse response = couponService.claimCoupon(userId, couponId);
-        return BaseResponse.success(response);
-    }
-
-    @Operation(summary = "특정 쿠폰 사용 처리")
-    @PatchMapping("/{couponId}/use")
-    public BaseResponse<CouponUseResponse> useCoupon(
-            @PathVariable Integer couponId,
-            @AuthenticationPrincipal OAuth2User oauth2User
-    ) {
-        Long userId = extractUserId(oauth2User);
-        return BaseResponse.success(couponService.useCoupon(userId, couponId));
-    }
-
-    @Operation(summary = "쿠폰 좋아요 등록", responses = {
-            @ApiResponse(responseCode = "200", description = "좋아요 등록 성공",
+    @Operation(
+            summary = "전체 쿠폰 조회",
+            description = """
+            모든 사용자가 이용할 수 있는 쿠폰 목록을 조회합니다.
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "쿠폰 목록 조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = CouponLikeResponse.class),
-                            examples = @ExampleObject(value = """
-                                {
-                                  "status": 200,
-                                  "message": "좋아요가 등록되었습니다.",
-                                  "data": {
-                                    "liked": true,
-                                    "coupon_id": 42
-                                  }
-                                }
-                            """)
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                          "success": true,
+                          "message": "쿠폰 목록 조회 성공",
+                          "data": [
+                            {
+                              "id": 1,
+                              "title": "스타벅스 10% 할인 쿠폰",
+                              "description": "모든 음료 10% 할인",
+                              "discountType": "PERCENTAGE",
+                              "discountValue": 10,
+                              "validUntil": "2025-12-31",
+                              "brand": {
+                                "id": 1,
+                                "name": "스타벅스",
+                                "imageUrl": "https://example.com/starbucks.png"
+                              }
+                            }
+                          ]
+                        }
+                        """
+                            )
                     )
             )
     })
-//
-    @PostMapping("/{couponId}/like")
-    public BaseResponse<CouponLikeResponse> likeCoupon(
-            @PathVariable Integer couponId,
-            @RequestHeader(value = "X-USER-ID", required = false) Long testUserId,
-            @RequestHeader(value = "X-BRAND-ID", required = false) Integer testBrandId,
-            @AuthenticationPrincipal OAuth2User oauth2User) {
+    @GetMapping
+    public BaseResponse<List<CouponResponse>> getAllCoupons() {
+        log.info("전체 쿠폰 목록 조회 요청");
 
-        Long userId = (oauth2User != null) ? Long.valueOf(oauth2User.getAttribute("id")) : testUserId;
-        Integer brandId = (oauth2User != null) ? oauth2User.getAttribute("brandId") : testBrandId;
+        // userId 없이 전체 쿠폰만 반환
+        List<CouponResponse> coupons = couponService.getAllCoupons(null);
 
-        if (userId == null || brandId == null) {
-            throw new IllegalStateException("유효한 ACCESS_TOKEN이 필요하거나 테스트 헤더가 필요합니다.");
-        }
-
-        CouponLikeResponse result = couponService.likeCoupon(couponId, userId, brandId);
-        return BaseResponse.success(result);
+        log.info("쿠폰 목록 조회 완료 - 쿠폰 수: {}", coupons.size());
+        return BaseResponse.success(coupons);
     }
 
+    @Operation(
+            summary = "특정 쿠폰 발급 요청",
+            description = """
+            특정 쿠폰을 현재 로그인한 사용자에게 발급합니다.
+            
+            **발급 조건:**
+            - 로그인된 사용자만 가능
+            - 쿠폰 발급 가능 수량 확인
+            - 중복 발급 방지
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "쿠폰 발급 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                          "success": true,
+                          "message": "쿠폰 발급이 완료되었습니다.",
+                          "data": {
+                            "couponId": 1,
+                            "title": "스타벅스 10% 할인 쿠폰",
+                            "claimedAt": "2025-06-15T18:30:00",
+                            "validUntil": "2025-12-31T23:59:59",
+                            "isUsed": false
+                          }
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "쿠폰 발급 불가 (이미 발급받음, 수량 초과 등)"),
+            @ApiResponse(responseCode = "401", description = "인증 필요"),
+            @ApiResponse(responseCode = "404", description = "쿠폰을 찾을 수 없음")
+    })
+    @SecurityRequirement(name = "cookieAuth")
+    @PostMapping("/{couponId}/claim")
+    public BaseResponse<CouponClaimResponse> claimCoupon(
+            @Parameter(description = "발급받을 쿠폰 ID", required = true, example = "1")
+            @PathVariable Integer couponId
+    ) {
+        log.info("쿠폰 발급 요청 - couponId: {}", couponId);
 
-    @Operation(summary = "좋아요 많은 BEST 쿠폰 Top3 조회")
-    @GetMapping("/best")
-    public BaseResponse<List<CouponSummary>> getBestCouponsApi() {
-        return BaseResponse.success(getBestCoupons());
+        Long userId = getCurrentUserIdAsLong();
+        CouponClaimResponse response = couponService.claimCoupon(userId, couponId);
+
+        log.info("쿠폰 발급 완료 - userId: {}, couponId: {}", userId, couponId);
+        return BaseResponse.success(response);
     }
 
-    private Long extractUserId(OAuth2User oauth2User) {
-        Object idAttr = oauth2User.getAttribute("id");
-        if (idAttr == null) {
-            throw new IllegalStateException("OAuth2User에 'id' 속성이 없습니다.");
+    @Operation(
+            summary = "특정 쿠폰 사용 처리",
+            description = """
+            보유한 쿠폰을 사용 처리합니다.
+            
+            **사용 조건:**
+            - 로그인된 사용자만 가능
+            - 보유한 쿠폰만 사용 가능
+            - 미사용 상태인 쿠폰만 사용 가능
+            - 유효기간 내 쿠폰만 사용 가능
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "쿠폰 사용 처리 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                        {
+                          "success": true,
+                          "message": "쿠폰이 성공적으로 사용되었습니다.",
+                          "data": {
+                            "couponId": 1,
+                            "title": "스타벅스 10% 할인 쿠폰",
+                            "usedAt": "2025-06-15T18:30:00",
+                            "discountAmount": 500,
+                            "originalPrice": 5000,
+                            "finalPrice": 4500
+                          }
+                        }
+                        """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "쿠폰 사용 불가 (이미 사용됨, 만료됨 등)"),
+            @ApiResponse(responseCode = "401", description = "인증 필요"),
+            @ApiResponse(responseCode = "404", description = "보유한 쿠폰을 찾을 수 없음")
+    })
+    @SecurityRequirement(name = "cookieAuth")
+    @PatchMapping("/{couponId}/use")
+    public BaseResponse<CouponUseResponse> useCoupon(
+            @Parameter(description = "사용할 쿠폰 ID", required = true, example = "1")
+            @PathVariable Integer couponId
+    ) {
+        log.info("쿠폰 사용 요청 - couponId: {}", couponId);
+
+        Long userId = getCurrentUserIdAsLong();
+        CouponUseResponse response = couponService.useCoupon(userId, couponId);
+
+        log.info("쿠폰 사용 완료 - userId: {}, couponId: {}", userId, couponId);
+        return BaseResponse.success(response);
+    }
+
+    /**
+     * SecurityContext에서 현재 사용자 ID 추출
+     */
+    private String getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.error("인증되지 않은 사용자의 쿠폰 API 접근 시도");
+            throw new RuntimeException("인증되지 않은 사용자입니다.");
         }
+
+        String userId = (String) authentication.getPrincipal();
+        log.debug("현재 사용자 ID: {}", userId);
+        return userId;
+    }
+
+    /**
+     * JWT에서 추출한 User.userId(String)로 User 엔티티를 조회하여 PK(Long) 반환
+     */
+    private Long getCurrentUserIdAsLong() {
         try {
-            return Long.valueOf(idAttr.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalStateException("'id' 속성의 형식이 올바르지 않습니다: " + idAttr);
+            String userIdStr = getCurrentUserId();
+
+            // User.userId(String)로 User 엔티티 조회
+            User user = userRepository.findByUserId(userIdStr)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userIdStr));
+
+            Long userPkId = user.getId();
+            log.debug("JWT userId: {} -> User PK: {}", userIdStr, userPkId);
+
+            return userPkId;
+
+        } catch (Exception e) {
+            log.error("사용자 ID 변환 중 오류 발생: {}", e.getMessage());
+            throw new RuntimeException("사용자 정보를 조회할 수 없습니다.");
         }
-    }
-
-    @Transactional
-    public CouponLikeResponse likeCoupon(Integer couponId, Integer userId, Integer brandId) {
-        Long userIdLong = userId.longValue();
-
-        // 좋아요 존재 여부 확인 (isLiked=true만 해당)
-        Optional<CouponLike> existingLikeOpt = couponLikeRepository.findActiveLike(couponId, userIdLong);
-
-        boolean isLiked;
-
-        if (existingLikeOpt.isPresent()) {
-            // 이미 좋아요 상태면 삭제 (좋아요 취소)
-            couponLikeRepository.delete(existingLikeOpt.get());
-            isLiked = false;
-        } else {
-            // 없으면 새로 좋아요 생성
-            CouponLike newLike = CouponLike.create(couponId, userId, brandId);
-            couponLikeRepository.save(newLike);
-            isLiked = true;
-        }
-
-        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
-    }
-
-
-    @Transactional(readOnly = true)
-    public List<CouponSummary> getBestCoupons() {
-        List<Coupon> topCoupons = couponRepository.findTop3ByLikeCount();
-        return topCoupons.stream()
-                .map(CouponSummary::from)
-                .collect(Collectors.toList());
     }
 }
