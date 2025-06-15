@@ -5,6 +5,7 @@ import com.team4ever.backend.domain.user.dto.CreateUserRequest;
 import com.team4ever.backend.domain.user.dto.LikedCouponsResponse;
 import com.team4ever.backend.domain.user.dto.UserResponse;
 import com.team4ever.backend.domain.user.dto.UserSubscriptionListResponse;
+import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +29,7 @@ import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
 public class UserController {
 
     private final UserService svc;
+    private final UserRepository userRepository;
 
     @Operation(summary = "신규 회원 생성")
     @PostMapping
