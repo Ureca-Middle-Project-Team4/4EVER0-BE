@@ -87,35 +87,29 @@ public class CouponService {
 //        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
 //    }
 
-@Transactional
-public CouponLikeResponse likeCoupon(Integer couponId, Long userId, Integer brandId) {
-    System.out.println("👉 likeCoupon 실행됨: couponId=" + couponId + ", userId=" + userId + ", brandId=" + brandId);
+    @Transactional
+    public CouponLikeResponse likeCoupon(Integer couponId, Long userId) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
-    CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
-            .orElse(null);
+        Integer brandId = coupon.getBrand().getId(); // ← 자동 추출
 
-    System.out.println("👉 기존 좋아요 여부: " + (like != null ? like.isLiked() : "없음"));
+        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId).orElse(null);
+        boolean isLiked;
 
-    boolean isLiked;
-
-    if (like != null) {
-        like.toggle();  // 여기가 NPE 가능성 있음
-        couponLikeRepository.save(like);
-        isLiked = like.isLiked();
-        System.out.println("✅ 좋아요 토글 후 상태: " + isLiked);
-    } else {
-        if (brandId == null) {
-            System.out.println("❌ brandId가 null이야! create()에서 터질 수 있음");
+        if (like != null) {
+            like.toggle();
+            couponLikeRepository.save(like);
+            isLiked = like.isLiked();
+        } else {
+            CouponLike newLike = CouponLike.create(couponId, userId.intValue(), brandId);
+            couponLikeRepository.save(newLike);
+            isLiked = true;
         }
 
-        CouponLike newLike = CouponLike.create(couponId, userId.intValue(), brandId);  // ← 여기도 NPE 가능성
-        couponLikeRepository.save(newLike);
-        isLiked = true;
-        System.out.println("✅ 좋아요 신규 등록 완료");
+        return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
     }
 
-    return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
-}
 
 
     @Transactional(readOnly = true)

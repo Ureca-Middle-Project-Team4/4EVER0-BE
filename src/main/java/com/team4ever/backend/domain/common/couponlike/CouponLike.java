@@ -40,6 +40,10 @@ public class CouponLike {
 	}
 
 	public static CouponLike create(Integer couponId, Integer userId, Integer brandId) {
+		if (brandId == null) {
+			throw new IllegalArgumentException("brandId must not be null when creating a CouponLike.");
+		}
+
 		return CouponLike.builder()
 				.couponId(couponId)
 				.userId(Long.valueOf(userId))
@@ -47,4 +51,5 @@ public class CouponLike {
 				.isLiked(true)
 				.build();
 	}
+
 }

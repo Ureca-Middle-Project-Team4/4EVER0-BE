@@ -1,6 +1,7 @@
 package com.team4ever.backend.domain.coupon.controller;
 
 import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
+import com.team4ever.backend.domain.coupon.dto.CouponLikeResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
 import com.team4ever.backend.domain.coupon.service.CouponService;
@@ -176,6 +177,8 @@ public class CouponController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "404", description = "보유한 쿠폰을 찾을 수 없음")
     })
+
+
     @SecurityRequirement(name = "cookieAuth")
     @PatchMapping("/{couponId}/use")
     public BaseResponse<CouponUseResponse> useCoupon(
@@ -190,6 +193,52 @@ public class CouponController {
         log.info("쿠폰 사용 완료 - userId: {}, couponId: {}", userId, couponId);
         return BaseResponse.success(response);
     }
+
+    @Operation(
+            summary = "쿠폰 좋아요/취소",
+            description = """
+        특정 쿠폰에 대해 좋아요 또는 좋아요 취소 요청을 처리합니다.
+        
+        - 최초 요청 시 좋아요 등록
+        - 이미 좋아요 상태인 경우 요청 시 좋아요 취소 처리 (`isLiked: false`)
+        - 로그인된 사용자만 사용 가능
+        - 내부적으로는 상태만 토글되며 기록은 유지됩니다.
+        """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "좋아요 상태 변경 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                {
+                                  "success": true,
+                                  "message": "성공",
+                                  "data": {
+                                    "couponId": 1,
+                                    "liked": true
+                                  }
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 쿠키 없음)"),
+            @ApiResponse(responseCode = "404", description = "쿠폰을 찾을 수 없음"),
+            @ApiResponse(responseCode = "400", description = "브랜드 정보 누락 또는 잘못된 요청")
+    })
+    @SecurityRequirement(name = "cookieAuth")
+    @PostMapping("/{couponId}/like")
+    public BaseResponse<CouponLikeResponse> likeCoupon(
+            @PathVariable Integer couponId
+    ) {
+        Long userId = getCurrentUserIdAsLong();
+        CouponLikeResponse response = couponService.likeCoupon(couponId, userId);
+        return BaseResponse.success(response);
+    }
+
 
     /**
      * SecurityContext에서 현재 사용자 ID 추출
