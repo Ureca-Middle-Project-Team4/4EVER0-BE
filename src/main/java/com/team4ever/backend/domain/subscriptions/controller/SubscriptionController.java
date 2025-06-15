@@ -30,7 +30,7 @@ import static com.team4ever.backend.global.response.BaseResponse.*;
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
-@Tag(name = "📺 구독 API", description = "구독 상품 조회, 가입, 해지 관련 API")
+@Tag(name = "구독 API", description = "구독 상품 조회, 가입, 해지 관련 API")
 public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;

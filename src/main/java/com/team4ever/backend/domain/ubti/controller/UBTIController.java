@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/ubti")
 @RequiredArgsConstructor
-@Tag(name = "🧠 UBTI API", description = "UBTI 타코시그널 테스트 API (인증 필요)")
+@Tag(name = "UBTI API", description = "UBTI 타코시그널 테스트 API (인증 필요)")
 @SecurityRequirement(name = "cookieAuth")
 public class UBTIController {
 
