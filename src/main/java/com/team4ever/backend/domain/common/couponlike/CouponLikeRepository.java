@@ -12,9 +12,7 @@ import java.util.Optional;
 @Repository
 public interface CouponLikeRepository extends JpaRepository<CouponLike, Integer> {
 
-	/**
-	 * 사용자가 좋아요한 쿠폰 목록 조회 (쿠폰 상세 정보 포함)
-	 */
+	// 사용자가 좋아요한 쿠폰 목록 조회
 	@Query("""
         SELECT new com.team4ever.backend.domain.user.dto.LikedCouponDto(
             c.id,
@@ -35,20 +33,26 @@ public interface CouponLikeRepository extends JpaRepository<CouponLike, Integer>
     """)
 	List<LikedCouponDto> findLikedCouponsByUserId(@Param("userId") Long userId);
 
-	/**
-	 * isLiked 여부와 상관없이 사용자와 쿠폰으로 좋아요 엔티티 조회
-	 */
+	// 사용자의 특정 쿠폰 좋아요 여부 조회
 	Optional<CouponLike> findByCouponIdAndUserId(Integer couponId, Long userId);
 
-	/**
-	 * 현재 좋아요 중인 상태인지 확인 (isLiked=true만 조회)
-	 */
+	// 현재 좋아요 중인지 확인
 	@Query("""
-    SELECT cl FROM CouponLike cl
-    WHERE cl.couponId = :couponId
-      AND cl.userId = :userId
-      AND cl.isLiked = true
-""")
+        SELECT cl FROM CouponLike cl
+        WHERE cl.couponId = :couponId
+          AND cl.userId = :userId
+          AND cl.isLiked = true
+    """)
 	Optional<CouponLike> findActiveLike(@Param("couponId") Integer couponId, @Param("userId") Long userId);
 
+	// 좋아요 수가 많은 쿠폰 ID Top 3 조회
+	@Query(value = """
+        SELECT coupon_id
+        FROM coupon_likes
+        WHERE is_liked = true
+        GROUP BY coupon_id
+        ORDER BY COUNT(*) DESC
+        LIMIT 3
+    """, nativeQuery = true)
+	List<Integer> findTop3CouponIdsByLikeCount();
 }

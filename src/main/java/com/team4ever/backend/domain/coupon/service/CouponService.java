@@ -92,31 +92,52 @@ public class CouponService {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
-        Integer brandId = coupon.getBrand().getId(); // ← 자동 추출
+        Integer brandId = coupon.getBrand().getId(); // 자동 추출!
 
-        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId).orElse(null);
+        CouponLike like = couponLikeRepository.findByCouponIdAndUserId(couponId, userId)
+                .orElse(null);
+
         boolean isLiked;
 
         if (like != null) {
             like.toggle();
             couponLikeRepository.save(like);
-            isLiked = like.isLiked();
+
+            if (like.isLiked()) {
+                coupon.increaseLikes();
+            } else {
+                coupon.decreaseLikes();
+            }
         } else {
-            CouponLike newLike = CouponLike.create(couponId, userId.intValue(), brandId);
-            couponLikeRepository.save(newLike);
-            isLiked = true;
+            couponLikeRepository.save(CouponLike.create(couponId, userId.intValue(), brandId));
+            coupon.increaseLikes();
         }
+
+        couponRepository.save(coupon);
+        couponRepository.flush(); // DB 강제 반영
+        isLiked = (like == null) || like.isLiked();
 
         return new CouponLikeResponse(isLiked, Long.valueOf(couponId));
     }
 
 
-
     @Transactional(readOnly = true)
     public List<CouponSummary> getBestCoupons() {
-        List<Coupon> topCoupons = couponRepository.findTop3ByLikeCount();
-        return topCoupons.stream()
+        // 1. 좋아요 수 기준 상위 3개 쿠폰 ID 조회
+        List<Integer> topCouponIds = couponLikeRepository.findTop3CouponIdsByLikeCount();
+
+        if (topCouponIds.isEmpty()) return List.of();
+
+        // 2. 쿠폰 ID 기준으로 쿠폰 정보 조회
+        List<Coupon> coupons = couponRepository.findByIdIn(topCouponIds);
+
+        // 3. 좋아요 수 기준 정렬 (ID 기준 조회 시 순서 보장 안 되므로)
+        coupons.sort((c1, c2) -> Integer.compare(c2.getLikes(), c1.getLikes()));
+
+        // 4. DTO로 변환
+        return coupons.stream()
                 .map(CouponSummary::from)
                 .collect(Collectors.toList());
     }
+
 }

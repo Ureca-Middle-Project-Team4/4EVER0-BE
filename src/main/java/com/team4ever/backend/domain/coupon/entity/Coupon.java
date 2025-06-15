@@ -31,15 +31,21 @@ public class Coupon {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @Getter
+	@Column(name = "likes", nullable = false, columnDefinition = "INT DEFAULT 0 COMMENT '좋아요 수'")
     private int likes = 0;
 
-    public int getLikes() {
-        return likes;
-    }
 
-    public void increaseLikes() {
+	public void increaseLikes() {
         this.likes += 1;
     }
+
+    public void decreaseLikes() {
+        if (this.likes > 0) {
+            this.likes -= 1;
+        }
+    }
+
 
     public enum DiscountType {
         PERCENT, FIXED

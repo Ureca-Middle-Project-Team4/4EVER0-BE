@@ -9,20 +9,10 @@ import java.util.List;
 
 public interface CouponRepository extends JpaRepository<Coupon, Integer> {
 
+	// 유효 기간 내 전체 쿠폰 조회
 	@Query("SELECT c FROM Coupon c WHERE :today BETWEEN c.startDate AND c.endDate")
 	List<Coupon> findAllValid(LocalDate today);
 
-	// 좋아요 상위 3개 쿠폰 조회 (native 쿼리 사용)
-	@Query(value = """
-        SELECT c.* FROM coupons c
-        JOIN (
-            SELECT coupon_id
-            FROM coupon_likes
-            WHERE is_liked = true
-            GROUP BY coupon_id
-            ORDER BY COUNT(*) DESC
-            LIMIT 3
-        ) cl ON c.id = cl.coupon_id
-    """, nativeQuery = true)
-	List<Coupon> findTop3ByLikeCount();
+	// 특정 쿠폰 ID 리스트에 해당하는 쿠폰들 조회
+	List<Coupon> findByIdIn(List<Integer> ids);
 }
