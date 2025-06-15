@@ -19,7 +19,7 @@ public class SwaggerConfig {
 						.addSecuritySchemes("cookieAuth", new SecurityScheme()
 								.type(SecurityScheme.Type.APIKEY)
 								.in(SecurityScheme.In.COOKIE)
-								.name("JSESSIONID")  // Spring 세션 쿠키 이름
+								.name("ACCESS_TOKEN")  // Spring 세션 쿠키 이름
 						)
 				)
 				.addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
