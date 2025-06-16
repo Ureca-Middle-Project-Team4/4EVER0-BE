@@ -1,6 +1,6 @@
 package com.team4ever.backend.global.config;
 
-import com.team4ever.backend.global.security.JwtInterceptor; // [추가]
+import com.team4ever.backend.global.security.JwtInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -17,10 +17,10 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final JwtInterceptor jwtInterceptor;            // [추가]
+    private final JwtInterceptor jwtInterceptor;
 
-    public WebMvcConfig(JwtInterceptor jwtInterceptor) {    // [추가]
-        this.jwtInterceptor = jwtInterceptor;               // [추가]
+    public WebMvcConfig(JwtInterceptor jwtInterceptor) {
+        this.jwtInterceptor = jwtInterceptor;
     }
 
     @Bean
@@ -30,6 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         filter.setForceEncoding(true);
         return filter;
     }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
@@ -45,26 +46,44 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
+                // 보호할 경로 명시적으로 지정
+                .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        //REST API
+                        // === 인증 관련 (공개 API) ===
                         "/api/auth/**",
                         "/api/refresh",
-                        "/api/plans",
-                        "/api/plans/**",
+
+                        // === 공개 조회 API (인증 불필요) ===
+                        // 요금제 공개 조회
+                        "/api/plans",           // 전체 요금제 조회
+                        "/api/plans/*",         // 요금제 상세 조회 (GET /api/plans/{id})
+
+                        // 구독 관련 공개 조회
                         "/api/subscriptions/main",
                         "/api/subscriptions/brands",
+
+                        // 팝업 관련 공개 조회
                         "/api/popups",
-                        "/api/popups/**",
-                        "/api/coupons",
+                        "/api/popups/*",
+
+                        // 쿠폰 공개 조회만 허용
+                        "/api/coupons",         // GET /api/coupons 만 허용
+
+                        // 일반 채팅
                         "/api/chat",
-                        "/api/coupons/**",
-                        "/api/user/coupons",
-                        //Swagger
+
+                        // === Swagger 관련 ===
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
-                        "/webjars/**"
+                        "/webjars/**",
+
+                        // === 정적 리소스 ===
+                        "/images/**",
+                        "/static/**",
+                        "/favicon.ico",
+                        "/error"
                 );
     }
 

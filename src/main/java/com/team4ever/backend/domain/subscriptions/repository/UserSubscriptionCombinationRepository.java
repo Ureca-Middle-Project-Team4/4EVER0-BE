@@ -17,20 +17,21 @@ public interface UserSubscriptionCombinationRepository extends JpaRepository<Use
 	Optional<UserSubscriptionCombination> findByUserIdAndSubscriptionCombinationId(Long userId, Integer subscriptionCombinationId);
 
 	@Query("""
-        SELECT new com.team4ever.backend.domain.user.dto.UserSubscriptionDto(
-            usc.id,
-            s.title,
-            b.name,
-            usc.price,
-            usc.createdAt
-        )
-        FROM UserSubscriptionCombination usc
-        JOIN SubscriptionCombination sc ON usc.subscriptionCombinationId = sc.id
-        JOIN Subscription s ON sc.subscriptionId = s.id
-        JOIN Brand b ON sc.brandId = b.id
-        WHERE usc.userId = :userId
-        ORDER BY usc.createdAt DESC
-    """)
+    SELECT new com.team4ever.backend.domain.user.dto.UserSubscriptionDto(
+        usc.id,
+        usc.subscriptionCombinationId,
+        s.title,
+        b.name,
+        usc.price,
+        usc.createdAt
+    )
+    FROM UserSubscriptionCombination usc
+    JOIN SubscriptionCombination sc ON usc.subscriptionCombinationId = sc.id
+    JOIN Subscription s ON sc.subscriptionId = s.id
+    JOIN Brand b ON sc.brandId = b.id
+    WHERE usc.userId = :userId
+    ORDER BY usc.createdAt DESC
+""")
 	List<UserSubscriptionDto> findUserSubscriptionsWithDetails(@Param("userId") Long userId);
 
 	long countByUserId(Long userId);
