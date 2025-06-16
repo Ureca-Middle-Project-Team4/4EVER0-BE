@@ -1,5 +1,6 @@
 package com.team4ever.backend.domain.coupon.repository;
 
+import com.team4ever.backend.domain.common.brand.Brand;
 import com.team4ever.backend.domain.coupon.entity.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

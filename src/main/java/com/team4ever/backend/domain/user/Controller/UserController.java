@@ -24,6 +24,7 @@ import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+
 @Tag(name = "사용자 API", description = "사용자 정보 및 개인 데이터 관리 API (인증 필요)")
 @SecurityRequirement(name = "cookieAuth")
 public class UserController {
