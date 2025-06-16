@@ -2,9 +2,7 @@ package com.team4ever.backend.domain.coupon.controller;
 
 import com.team4ever.backend.domain.common.brand.Brand;
 import com.team4ever.backend.domain.common.brand.BrandRepository;
-import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponResponse;
-import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
+import com.team4ever.backend.domain.coupon.dto.*;
 import com.team4ever.backend.domain.coupon.service.CouponService;
 import com.team4ever.backend.domain.maps.dto.PlaceSearchRequest;
 import com.team4ever.backend.domain.maps.dto.PlaceSearchResponse;
@@ -187,6 +185,8 @@ public class CouponController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "404", description = "보유한 쿠폰을 찾을 수 없음")
     })
+
+
     @SecurityRequirement(name = "cookieAuth")
     @PatchMapping("/{couponId}/use")
     public BaseResponse<CouponUseResponse> useCoupon(
@@ -201,6 +201,92 @@ public class CouponController {
         log.info("쿠폰 사용 완료 - userId: {}, couponId: {}", userId, couponId);
         return BaseResponse.success(response);
     }
+
+    @Operation(
+            summary = "쿠폰 좋아요/취소",
+            description = "사용자가 특정 쿠폰에 좋아요를 누르거나 취소합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "좋아요 상태 변경 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                {
+                                  "success": true,
+                                  "message": "성공",
+                                  "data": {
+                                    "couponId": 1,
+                                    "liked": true
+                                  }
+                                }
+                                """
+                            )
+                    )
+            )
+    })
+    @SecurityRequirement(name = "cookieAuth")
+    @PostMapping("/{couponId}/like")
+    public BaseResponse<CouponLikeResponse> likeCoupon(
+            @PathVariable Integer couponId
+    ) {
+        Long userId = getCurrentUserIdAsLong();
+        CouponLikeResponse response = couponService.likeCoupon(couponId, userId);
+        return BaseResponse.success(response);
+    }
+
+
+
+    @Operation(
+            summary = "인기 쿠폰 TOP 3 조회",
+            description = """
+        좋아요 수 기준으로 가장 인기 있는 쿠폰 3개를 조회합니다.
+        
+        - 모든 사용자에게 공개된 API
+        - 좋아요 수가 많은 순으로 정렬됨
+        - 로그인 불필요
+        """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "인기 쿠폰 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                {
+                                  "success": true,
+                                  "message": "인기 쿠폰 조회 성공",
+                                  "data": [
+                                    {
+                                      "couponId": 5,
+                                      "title": "배스킨라빈스 1+1 쿠폰",
+                                      "brandName": "배스킨라빈스",
+                                      "brandId": 2,
+                                      "discountType": "PERCENTAGE",
+                                      "discountValue": 50,
+                                      "startDate": "2025-06-01",
+                                      "endDate": "2025-12-31"
+                                    }
+                                  ]
+                                }
+                                """
+                            )
+                    )
+            )
+    })
+
+
+    @GetMapping("/best")
+    public BaseResponse<List<CouponSummary>> getBestCoupons() {
+        log.info("인기 쿠폰 TOP 3 조회 요청");
+        List<CouponSummary> best = couponService.getBestCoupons();
+        return BaseResponse.success(best);
+    }
+
 
     /**
      * SecurityContext에서 현재 사용자 ID 추출
