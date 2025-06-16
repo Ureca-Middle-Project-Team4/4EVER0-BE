@@ -13,4 +13,7 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
 
 	@Query("SELECT b FROM Brand b WHERE TRIM(b.category) = TRIM(:category)")
 	List<Brand> findByCategoryExact(@Param("category") String category);
+
+	@Query("SELECT b FROM Brand b WHERE b.id = :brandId")
+	Brand findBrandId(int brandId);
 }

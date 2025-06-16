@@ -8,6 +8,8 @@ import com.team4ever.backend.domain.user.dto.UserSubscriptionListResponse;
 import com.team4ever.backend.global.exception.CustomException;
 import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +21,14 @@ import com.team4ever.backend.domain.user.dto.UserCouponListResponse;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Tag(name = "인증 API", description = "회원 가입 및 토큰 유효성 검사 API")
 public class UserController {
 
     private final UserService svc;
 
     // 신규 회원 생성
+    @Operation(
+            summary = "회원 가입")
     @PostMapping
     public ResponseEntity<Long> createUser(
             @Valid @RequestBody CreateUserRequest req
@@ -33,6 +38,8 @@ public class UserController {
     }
 
     // user jwt로 회원 정보 조회
+    @Operation(
+            summary = "JWT로 회원 검증")
     @GetMapping
     public ResponseEntity<UserResponse> getCurrentUser() {
         UserResponse dto = svc.getCurrentUser();
@@ -42,6 +49,9 @@ public class UserController {
     /**
      * 내 구독 상품 목록 조회
      */
+
+    @Operation(
+            summary = "내 구독 상품 목록 조회하기")
     @GetMapping("/subscriptions")
     public ResponseEntity<BaseResponse<UserSubscriptionListResponse>> getUserSubscriptions(
             @AuthenticationPrincipal OAuth2User oAuth2User
@@ -59,6 +69,9 @@ public class UserController {
     /**
      * 좋아요한 쿠폰 목록 조회
      */
+
+    @Operation(
+            summary = "좋아요한 쿠폰 목록 조회")
     @GetMapping("/likes/coupons")
     public ResponseEntity<BaseResponse<LikedCouponsResponse>> getLikedCoupons(
             @AuthenticationPrincipal OAuth2User oAuth2User
@@ -73,6 +86,8 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success(response));
     }
     //보유중인 쿠폰 조회
+    @Operation(
+            summary = "현재 보유 중인 쿠폰 조회")
     @GetMapping("/coupons")
     public ResponseEntity<BaseResponse<UserCouponListResponse>> getMyCoupons(@AuthenticationPrincipal OAuth2User oAuth2User) {
         if (oAuth2User == null || oAuth2User.getAttribute("id") == null) {

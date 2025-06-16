@@ -1,6 +1,6 @@
-package com.team4ever.backend.domain.naver.repository;
+package com.team4ever.backend.domain.maps.repository;
 
-import com.team4ever.backend.domain.naver.dto.ReverseGeocodeResponse;
+import com.team4ever.backend.domain.maps.dto.ReverseGeocodeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -19,7 +19,7 @@ public class ReverseGeocodingRepository {
     private String clientSecret;
 
     private static final String REVERSE_GEOCODE_URL =
-            "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc";
+            "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc";
 
     public ReverseGeocodeResponse reverseGeocode(double lat, double lng) {
         String coords = lng + "," + lat; // 경도,위도 순서
@@ -29,6 +29,9 @@ public class ReverseGeocodingRepository {
                 .queryParam("orders", "admcode")
                 .queryParam("output", "json");
 
+        String uriString = builder.toUriString();
+        System.out.println("네이버 Reverse Geocoding 호출 URI: " + uriString);
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-NCP-APIGW-API-KEY-ID", clientId);
         headers.set("X-NCP-APIGW-API-KEY", clientSecret);
@@ -36,7 +39,7 @@ public class ReverseGeocodingRepository {
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
         ResponseEntity<ReverseGeocodeResponse> response = restTemplate.exchange(
-                builder.toUriString(), HttpMethod.GET, entity, ReverseGeocodeResponse.class
+                uriString, HttpMethod.GET, entity, ReverseGeocodeResponse.class
         );
         return response.getBody();
     }

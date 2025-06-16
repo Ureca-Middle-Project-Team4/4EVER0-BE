@@ -1,4 +1,4 @@
-package com.team4ever.backend.domain.naver.dto;
+package com.team4ever.backend.domain.maps.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -129,3 +129,8 @@ naver:
   cloud:
     access-key: ${NAVER_CLOUD_ACCESS_KEY}
     secret-key: ${NAVER_CLOUD_SECRET_KEY}
+
+google:
+  places:
+    api:
+      key: ${GOOGLE_PLACES_API_KEY}

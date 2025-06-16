@@ -65,6 +65,7 @@ public class BackendApplication {
 		System.setProperty("NAVER_CLOUD_ACCESS_KEY", dotenv.get("NAVER_CLOUD_ACCESS_KEY"));
 		System.setProperty("NAVER_CLOUD_SECRET_KEY", dotenv.get("NAVER_CLOUD_SECRET_KEY"));
 
+		System.setProperty("GOOGLE_PLACES_API_KEY", dotenv.get("GOOGLE_PLACES_API_KEY"));
 		SpringApplication.run(BackendApplication.class, args);
 	}
 }

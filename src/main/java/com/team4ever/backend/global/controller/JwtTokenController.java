@@ -2,6 +2,7 @@ package com.team4ever.backend.global.controller;
 
 import com.team4ever.backend.global.security.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.*;
@@ -12,6 +13,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "JWT 관련 API", description = "로그인/로그아웃, 토큰 재발급")
 public class JwtTokenController {
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;
