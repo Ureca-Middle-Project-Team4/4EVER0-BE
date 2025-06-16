@@ -5,19 +5,20 @@ import com.team4ever.backend.domain.common.brand.BrandRepository;
 import com.team4ever.backend.domain.coupon.dto.CouponClaimResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponResponse;
 import com.team4ever.backend.domain.coupon.dto.CouponUseResponse;
-import com.team4ever.backend.domain.coupon.repository.CouponRepository;
 import com.team4ever.backend.domain.coupon.service.CouponService;
 import com.team4ever.backend.domain.maps.dto.PlaceSearchRequest;
 import com.team4ever.backend.domain.maps.dto.PlaceSearchResponse;
 import com.team4ever.backend.domain.maps.service.PlaceService;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
-import com.team4ever.backend.global.exception.CustomException;
-import com.team4ever.backend.global.exception.ErrorCode;
 import com.team4ever.backend.global.response.BaseResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -28,8 +29,6 @@ import org.json.JSONException;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
