@@ -5,13 +5,18 @@ import com.team4ever.backend.domain.attendance.entity.Attendance;
 import com.team4ever.backend.domain.attendance.repository.AttendanceRepository;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
+import com.team4ever.backend.global.exception.CustomException;
+import com.team4ever.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +35,12 @@ public class AttendanceService {
 
         // 이미 오늘 출석했는지 확인
         if (attendanceRepository.existsByUserIdAndCheckedDate(userId, today)) {
-            throw new IllegalStateException("이미 오늘 출석하셨습니다.");
+            throw new CustomException(ErrorCode.ALREADY_CHECKED); // 중복 출석일 때
+
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)); // 유저가 없을 때
 
         // 1. 연속출석이 끊겼는지 체크하고 필요시 초기화
         checkAndResetStreakIfBroken(user);
@@ -109,8 +115,21 @@ public class AttendanceService {
     @Transactional(readOnly = true)
     public int getCurrentStreak(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)); // 유저 없을 때
 
         return user.getAttendanceStreak();
     }
+
+    public List<String> getAttendanceDatesForMonth(Long userId, int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        List<Attendance> records = attendanceRepository.findByUserIdAndCheckedDateBetween(userId, start, end);
+        return records.stream()
+                .map(record -> record.getCheckedDate().toString()) // "2025-06-15"
+                .collect(Collectors.toList());
+    }
+
+
 }
