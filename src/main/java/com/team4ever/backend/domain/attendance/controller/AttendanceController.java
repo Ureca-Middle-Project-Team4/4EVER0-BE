@@ -19,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/attendances")
@@ -221,4 +223,39 @@ public class AttendanceController {
             throw new RuntimeException("사용자 정보를 조회할 수 없습니다.");
         }
     }
+
+    @Operation(
+            summary = "월별 출석 기록 조회",
+            description = "연-월(YYYY-MM)을 기준으로 출석 도장이 찍힐 날짜 목록을 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "요청 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                {
+                  "success": true,
+                  "message": "요청 성공",
+                  "data": ["2025-06-01", "2025-06-03", "2025-06-14"]
+                }
+                """
+                            )
+                    )
+            )
+    })
+    @GetMapping("/month")
+    public BaseResponse<List<String>> getMonthlyAttendance(
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        log.info("월별 출석 기록 조회 요청: year={}, month={}", year, month);
+        Long userId = getCurrentUserIdAsLong();
+        List<String> attendanceDates = attendanceService.getAttendanceDatesForMonth(userId, year, month);
+        return BaseResponse.success(attendanceDates);
+    }
+
+
 }
