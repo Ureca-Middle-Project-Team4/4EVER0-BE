@@ -5,6 +5,10 @@ import com.team4ever.backend.domain.popups.service.PopupService;
 import com.team4ever.backend.domain.popups.service.GeolocationService;
 import com.team4ever.backend.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,19 +21,81 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/popups")
 @RequiredArgsConstructor
+@Tag(name = "팝업 API", description = "팝업스토어 조회 및 위치 기반 탐색 API")
 public class PopupController {
 
     private final PopupService popupService;
     private final GeolocationService geolocationService;
 
-    @Operation(summary = "팝업스토어 전체 조회")
+    @Operation(
+            summary = "팝업스토어 전체 조회",
+            description = """
+            등록된 모든 팝업스토어 정보를 조회합니다.
+
+            - 정렬 기준: 기본 등록일 순
+            - 로그인 없이 조회 가능
+            """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            value = """
+                            {
+                              "success": true,
+                              "message": "요청 성공",
+                              "data": [
+                                {
+                                  "id": 1,
+                                  "name": "카카오프렌즈 팝업",
+                                  "location": "홍대입구역 9번 출구",
+                                  "startDate": "2025-06-10",
+                                  "endDate": "2025-06-20"
+                                }
+                              ]
+                            }
+                            """
+                    )
+            )
+    )
     @GetMapping
     public ResponseEntity<BaseResponse<List<PopupResponse>>> getAllPopups() {
         List<PopupResponse> result = popupService.getAllPopups();
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 
-    @Operation(summary = "특정 팝업스토어 조회")
+    @Operation(
+            summary = "특정 팝업스토어 조회",
+            description = """
+            팝업스토어 ID를 기반으로 상세 정보를 조회합니다.
+
+            - 유효하지 않은 ID일 경우 예외 발생
+            """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            value = """
+                            {
+                              "success": true,
+                              "message": "요청 성공",
+                              "data": {
+                                "id": 1,
+                                "name": "카카오프렌즈 팝업",
+                                "location": "홍대입구역 9번 출구",
+                                "startDate": "2025-06-10",
+                                "endDate": "2025-06-20"
+                              }
+                            }
+                            """
+                    )
+            )
+    )
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<PopupResponse>> getPopupById(@PathVariable Integer id) {
         PopupResponse result = popupService.getPopupById(id);
@@ -40,6 +106,37 @@ public class PopupController {
      * 수동 좌표로 근처 팝업스토어 조회
      * - 예시: GET /api/popups/nearby?lat=37.5665&lng=126.9780&radius=5.0
      */
+    @Operation(
+            summary = "수동 좌표 기반 근처 팝업스토어 조회",
+            description = """
+            사용자가 입력한 위도, 경도, 반경(km)을 기준으로 근처 팝업스토어를 조회합니다.
+
+            예시: `GET /api/popups/nearby?lat=37.5665&lng=126.9780&radius=3.0`
+            """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            value = """
+                            {
+                              "success": true,
+                              "message": "요청 성공",
+                              "data": [
+                                {
+                                  "id": 2,
+                                  "name": "무너 피규어 팝업",
+                                  "distance": 2.1,
+                                  "location": "신촌 현대백화점"
+                                }
+                              ]
+                            }
+                            """
+                    )
+            )
+    )
     @GetMapping("/nearby")
     public ResponseEntity<BaseResponse<List<NearbyPopupResponse>>> getNearbyPopups(
             @RequestParam Double lat,
@@ -62,6 +159,42 @@ public class PopupController {
     /**
      * IP 기반 자동 위치로 근처 팝업스토어 조회
      */
+    @Operation(
+            summary = "IP 기반 자동 위치로 근처 팝업스토어 조회",
+            description = """
+            클라이언트의 IP를 기반으로 위치를 자동 추정하여 주변 팝업스토어를 조회합니다.
+
+            - 실패 시 기본 위치(선릉 멀티캠퍼스)를 기준으로 조회합니다.
+            """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            value = """
+                            {
+                              "success": true,
+                              "message": "요청 성공",
+                              "data": {
+                                "latitude": 37.5032,
+                                "longitude": 127.0497,
+                                "address": "서울특별시 강남구 선릉로 428",
+                                "nearbyPopups": [
+                                  {
+                                    "id": 3,
+                                    "name": "무너 아트토이 팝업",
+                                    "distance": 1.8,
+                                    "location": "선릉역 1번 출구 앞"
+                                  }
+                                ]
+                              }
+                            }
+                            """
+                    )
+            )
+    )
     @GetMapping("/nearby/location")
     public ResponseEntity<BaseResponse<UserLocationResponse>> getNearbyPopupsAuto(
             HttpServletRequest request,
