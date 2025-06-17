@@ -57,10 +57,10 @@ public class UserController {
     }
 
     @Operation(
-            summary = "내 구독 상품 목록 조회",
-            description = "사용자가 구독 중인 유플투쁠 상품 목록을 반환합니다."
+            summary = "내 유독 Pick 상품 조회",
+            description = "사용자가 구독 중인 유독 Pick 목록을 반환합니다."
     )
-    @ApiResponse(responseCode = "200", description = "구독 상품 조회 성공")
+    @ApiResponse(responseCode = "200", description = "유독 Pick 상품 조회 성공")
     @GetMapping("/subscriptions")
     public ResponseEntity<BaseResponse<UserSubscriptionListResponse>> getUserSubscriptions() {
         String userId = getCurrentUserId();
