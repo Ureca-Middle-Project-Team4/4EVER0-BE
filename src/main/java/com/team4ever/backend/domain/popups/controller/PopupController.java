@@ -43,20 +43,31 @@ public class PopupController {
                     mediaType = "application/json",
                     examples = @ExampleObject(
                             value = """
+                        {
+                          "status": 200,
+                          "message": "요청 성공",
+                          "data": [
                             {
-                              "success": true,
-                              "message": "요청 성공",
-                              "data": [
-                                {
-                                  "id": 1,
-                                  "name": "카카오프렌즈 팝업",
-                                  "location": "홍대입구역 9번 출구",
-                                  "startDate": "2025-06-10",
-                                  "endDate": "2025-06-20"
-                                }
-                              ]
+                              "id": 1,
+                              "name": "소셜 타코 체험존",
+                              "description": "와사비타코와 함께하는 오프라인 소통의 장!       SNS 인증 시 한정 굿즈도 증정 ?",
+                              "address": "서울 강남구 테헤란로 123",
+                              "latitude": 37.5012743,
+                              "longitude": 127.039585,
+                              "image_url": "https://example.com/images/popup1.png"
+                            },
+                            {
+                              "id": 2,
+                              "name": "알뜰 팝업 마켓",
+                              "description": "가성비 갑 브랜드 할인 쿠폰 제공 중!       쿠폰 받고 팝업에서 바로 사용하세요 ?",
+                              "address": "서울 종로구 세종대로 175",
+                              "latitude": 37.566535,
+                              "longitude": 126.9779692,
+                              "image_url": "https://example.com/images/popup2.png"
                             }
-                            """
+                          ]
+                        }
+                        """
                     )
             )
     )
