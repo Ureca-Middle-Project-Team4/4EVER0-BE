@@ -16,5 +16,11 @@ public interface BenefitRepository extends JpaRepository<Benefit, Long> {
     @Query("SELECT b FROM Benefit b WHERE FUNCTION('YEAR', b.benefitDate) = :year AND FUNCTION('MONTH', b.benefitDate) = :month")
     List<Benefit> findAllByYearAndMonth(int year, int month);
 
+    @Query("SELECT b FROM Benefit b JOIN FETCH b.brand WHERE FUNCTION('YEAR', b.benefitDate) = :year AND FUNCTION('MONTH', b.benefitDate) = :month")
+    List<Benefit> findAllByYearAndMonthWithBrand(int year, int month);
+
+    @Query("SELECT b FROM Benefit b JOIN FETCH b.brand WHERE b.benefitDate = :benefitDate")
+    List<Benefit> findAllByBenefitDateWithBrand(LocalDate benefitDate);
+
 }
 
