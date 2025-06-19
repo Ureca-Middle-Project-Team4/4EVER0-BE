@@ -326,7 +326,55 @@ public class CouponController {
         }
     }
 
-    @Operation(summary = "근처 쿠폰 사용 가능 매장 조회")
+    @Operation(
+            summary = "근처 쿠폰 사용 가능 매장 조회",
+            description = """
+        입력한 위도, 경도 주변 반경 500m 내에서
+        지정한 브랜드 ID 리스트에 해당하는 쿠폰 사용 가능 매장을 조회합니다.
+
+        - brand_id는 여러 개 전달 가능 (예: brand_id=1&brand_id=2)
+        - 각 brand_id에 해당하는 브랜드명으로 매장 검색 수행
+        - 각 브랜드마다 최대 10개까지만 반환 가능
+        """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "근처 쿠폰 매장 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                {
+                  "success": true,
+                  "message": "근처 쿠폰 매장 조회 성공",
+                  "data": {
+                    "places": [
+                      {
+                        "name": "배스킨라빈스 선릉역점",
+                        "lat": 37.5053571,
+                        "lng": 127.0472785,
+                        "address": "대한민국 서울특별시 강남구 역삼동 696-5"
+                      },
+                      {
+                        "name": "올리브영 강남점",
+                        "lat": 37.498,
+                        "lng": 127.027,
+                        "address": "대한민국 서울특별시 강남구 신사동 ..."
+                      }
+                    ]
+                  }
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효하지 않은 brand_id 또는 요청 파라미터 오류",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @GetMapping("/nearby")
     public BaseResponse<PlaceSearchResponse> getNearbyCoupons(
             @RequestParam Double lat,
