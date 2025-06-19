@@ -35,6 +35,15 @@ public enum ErrorCode {
 	COUPON_NOT_CLAIMED(HttpStatus.NOT_FOUND, "발급된 쿠폰이 없습니다."),
 	COUPON_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 쿠폰입니다."),
 
+	// 채팅 및 추천 관련 에러
+	CHAT_AI_API_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 채팅 서비스 연결 오류가 발생했습니다."),
+	USAGE_RECOMMENDATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "사용량 기반 추천 생성 중 오류가 발생했습니다."),
+	LIKES_RECOMMENDATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "좋아요 기반 추천 생성 중 오류가 발생했습니다."),
+	CHAT_STREAMING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "채팅 스트리밍 중 오류가 발생했습니다."),
+	INVALID_TONE_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 톤 요청입니다."),
+	FASTAPI_CONNECTION_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "FastAPI 서버 연결 오류가 발생했습니다."),
+	USER_USAGE_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자의 사용량 데이터를 찾을 수 없습니다."),
+
 	// UBTI 관련 에러
 	UBTI_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "UBTI 타입 데이터를 찾을 수 없습니다."),
 	UBTI_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UBTI 결과 생성 중 오류가 발생했습니다."),
