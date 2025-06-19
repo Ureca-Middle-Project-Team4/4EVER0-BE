@@ -50,6 +50,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         // === 인증 관련 (공개 API) ===
+                        "/api/user",
                         "/api/auth/**",
                         "/api/refresh",
 

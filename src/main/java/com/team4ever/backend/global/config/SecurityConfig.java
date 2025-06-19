@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1) 쿠폰 전체 조회는 인증 없이 허용
                         .requestMatchers(HttpMethod.GET, "/api/coupons").permitAll()
-
+                        .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
                         // 2) OAuth 로그인용 엔드포인트
                         .requestMatchers(
                                 // 허용 API 목록
