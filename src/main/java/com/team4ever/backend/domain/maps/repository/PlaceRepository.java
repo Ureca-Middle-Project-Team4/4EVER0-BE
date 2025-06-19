@@ -23,55 +23,79 @@ public class PlaceRepository {
     private String apiKey;
 
     public PlaceSearchResponse searchPlaces(PlaceSearchRequest req) throws JSONException {
-        String url = "https://places.googleapis.com/v1/places:searchText";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Goog-Api-Key", apiKey);
-        headers.set("X-Goog-FieldMask", "places.displayName,places.location,places.formattedAddress");
+        List<PlaceSearchResponse.PlaceItem> allItems = new ArrayList<>();
+        int idCounter = 1;
 
-        JSONObject circle = new JSONObject();
-        circle.put("center", new JSONObject()
-                .put("latitude", req.getLatitude())
-                .put("longitude", req.getLongitude()));
-        circle.put("radius", req.getRadius());
+        for (String brand : req.getTextQueryList()){
+            String url = "https://places.googleapis.com/v1/places:searchText";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("X-Goog-Api-Key", apiKey);
+            headers.set("X-Goog-FieldMask", "places.displayName,places.location,places.formattedAddress");
 
-        JSONObject locationBias = new JSONObject();
-        locationBias.put("circle", circle);
+            JSONObject circle = new JSONObject();
+            circle.put("center", new JSONObject()
+                    .put("latitude", req.getLatitude())
+                    .put("longitude", req.getLongitude()));
+            circle.put("radius", req.getRadius());
 
-        JSONObject body = new JSONObject();
-        body.put("textQuery", req.getTextQuery());
-        if (req.getOpenNow() != null) body.put("openNow", req.getOpenNow());
-        if (req.getPageSize() != null) body.put("pageSize", req.getPageSize());
-        body.put("locationBias", locationBias);
-        body.put("languageCode", "ko");
+            JSONObject locationBias = new JSONObject();
+            locationBias.put("circle", circle);
 
-        HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            JSONObject body = new JSONObject();
+            body.put("textQuery", brand);
+            body.put("openNow", true);
+            if (req.getPageSize() != null) body.put("pageSize", req.getPageSize());
+            body.put("locationBias", locationBias);
+            body.put("languageCode", "ko");
 
-        JSONObject responseJson = new JSONObject(response.getBody());
-        JSONArray placesArray = responseJson.optJSONArray("places");
+            HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-        List<PlaceSearchResponse.PlaceItem> items = new ArrayList<>();
-        if (placesArray != null) {
-            for (int i = 0; i < placesArray.length(); i++) {
-                JSONObject obj = placesArray.getJSONObject(i);
-                PlaceSearchResponse.PlaceItem item = new PlaceSearchResponse.PlaceItem();
+            JSONObject responseJson = new JSONObject(response.getBody());
+            JSONArray placesArray = responseJson.optJSONArray("places");
 
-                item.setName(obj.optJSONObject("displayName") != null ?
-                        obj.getJSONObject("displayName").optString("text", "") : "");
-                item.setLat(obj.optJSONObject("location") != null ?
-                        obj.getJSONObject("location").optDouble("latitude", 0.0) : null);
-                item.setLng(obj.optJSONObject("location") != null ?
-                        obj.getJSONObject("location").optDouble("longitude", 0.0) : null);
-                item.setAddress(obj.optString("formattedAddress", ""));
-                item.setOpenNow(obj.optJSONObject("openingHours") != null ?
-                        obj.getJSONObject("openingHours").optBoolean("openNow", false) : null);
+            if (placesArray != null) {
+                for (int i = 0; i < placesArray.length(); i++) {
+                    JSONObject obj = placesArray.getJSONObject(i);
 
-                items.add(item);
+                    JSONObject displayNameObj = obj.optJSONObject("displayName");
+                    if (displayNameObj == null) continue;
+
+                    // languageCode가 "ko"인지 확인
+                    String langCode = displayNameObj.optString("languageCode", "");
+                    if (!"ko".equals(langCode)) {
+                        // 한글 응답이 아니면 건너뜀
+                        continue;
+                    }
+
+                    String placeName = displayNameObj.optString("text", "");
+
+                    // 브랜드명 포함 여부 체크 (예: brand 변수에 브랜드명 저장되어 있다고 가정)
+                    // brand 변수는 해당 API 호출 시 사용한 브랜드명이어야 합니다.
+                    if (!placeName.toLowerCase().contains(brand.toLowerCase())) {
+                        continue;  // 브랜드명이 포함되지 않으면 건너뜀
+                    }
+
+                    PlaceSearchResponse.PlaceItem item = new PlaceSearchResponse.PlaceItem();
+                    item.setId(idCounter);
+                    idCounter++;
+                    item.setName(placeName);
+
+                    JSONObject locationObj = obj.optJSONObject("location");
+                    if (locationObj != null) {
+                        item.setLat(locationObj.optDouble("latitude", 0.0));
+                        item.setLng(locationObj.optDouble("longitude", 0.0));
+                    }
+
+                    item.setAddress(obj.optString("formattedAddress", ""));
+                    allItems.add(item);
+                }
             }
         }
+
         PlaceSearchResponse result = new PlaceSearchResponse();
-        result.setPlaces(items);
+        result.setPlaces(allItems);
         return result;
     }
 }

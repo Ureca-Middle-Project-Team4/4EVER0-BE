@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Slf4j
 @RestController
@@ -325,37 +326,84 @@ public class CouponController {
         }
     }
 
-    @Operation(summary = "근처 쿠폰 사용 가능 매장 조회")
+    @Operation(
+            summary = "근처 쿠폰 사용 가능 매장 조회",
+            description = """
+        입력한 위도, 경도 주변 반경 500m 내에서
+        지정한 브랜드 ID 리스트에 해당하는 쿠폰 사용 가능 매장을 조회합니다.
+
+        - brand_id는 여러 개 전달 가능 (예: brand_id=1&brand_id=2)
+        - 각 brand_id에 해당하는 브랜드명으로 매장 검색 수행
+        - 각 브랜드마다 최대 10개까지만 반환 가능
+        """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "근처 쿠폰 매장 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                {
+                  "success": true,
+                  "message": "근처 쿠폰 매장 조회 성공",
+                  "data": {
+                    "places": [
+                      {
+                        "name": "배스킨라빈스 선릉역점",
+                        "lat": 37.5053571,
+                        "lng": 127.0472785,
+                        "address": "대한민국 서울특별시 강남구 역삼동 696-5"
+                      },
+                      {
+                        "name": "올리브영 강남점",
+                        "lat": 37.498,
+                        "lng": 127.027,
+                        "address": "대한민국 서울특별시 강남구 신사동 ..."
+                      }
+                    ]
+                  }
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효하지 않은 brand_id 또는 요청 파라미터 오류",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @GetMapping("/nearby")
     public BaseResponse<PlaceSearchResponse> getNearbyCoupons(
             @RequestParam Double lat,
             @RequestParam Double lng,
-            @RequestParam Integer brand_id) throws JSONException {
+            @RequestParam List<Integer> brand_id) throws JSONException {
 
-        // 1. brand_id로 브랜드명 조회 (예: BrandRepository 활용)
-        Brand brand = brandRepository.findBrandId(brand_id);
-        String brandName = brand.getName();
-        if (brandName == null || brandName.isBlank()) {
-            throw new IllegalArgumentException("브랜드를 찾을 수 없습니다.");
+        // brand_id 리스트 순회하며 브랜드명 조회 및 요청 처리
+        List<String> brandNames = new ArrayList<>();
+        for (Integer id : brand_id) {
+            Brand brand = brandRepository.findBrandId(id);
+            String name = brand.getName();
+            if (name == null || name.isBlank()) {
+                throw new IllegalArgumentException("브랜드를 찾을 수 없습니다. id=" + id);
+            }
+            brandNames.add(name);
         }
 
-        // 2. GooglePlaceService용 Request 생성
+        // PlaceSearchRequest에 brandNames 리스트 세팅
         PlaceSearchRequest req = new PlaceSearchRequest();
-        req.setTextQuery(brandName);
+        req.setTextQueryList(brandNames);
         req.setLatitude(lat);
         req.setLongitude(lng);
-        req.setRadius(500.0); // 500m 반경 등
-        req.setPageSize(10); // 결과 개수 제한
-        req.setOpenNow(false); // 영업중만 필터는 필요에 따라
+        req.setRadius(500.0);
+        req.setPageSize(10);
 
-        // 3. Service 호출
         PlaceSearchResponse result = placeService.search(req);
 
         return BaseResponse.success(result);
     }
-
-
-
 }
 
 
