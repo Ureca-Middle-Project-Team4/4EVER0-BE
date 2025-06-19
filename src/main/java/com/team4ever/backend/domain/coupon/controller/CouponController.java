@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Slf4j
 @RestController
@@ -330,32 +331,31 @@ public class CouponController {
     public BaseResponse<PlaceSearchResponse> getNearbyCoupons(
             @RequestParam Double lat,
             @RequestParam Double lng,
-            @RequestParam Integer brand_id) throws JSONException {
+            @RequestParam List<Integer> brand_id) throws JSONException {
 
-        // 1. brand_id로 브랜드명 조회 (예: BrandRepository 활용)
-        Brand brand = brandRepository.findBrandId(brand_id);
-        String brandName = brand.getName();
-        if (brandName == null || brandName.isBlank()) {
-            throw new IllegalArgumentException("브랜드를 찾을 수 없습니다.");
+        // brand_id 리스트 순회하며 브랜드명 조회 및 요청 처리
+        List<String> brandNames = new ArrayList<>();
+        for (Integer id : brand_id) {
+            Brand brand = brandRepository.findBrandId(id);
+            String name = brand.getName();
+            if (name == null || name.isBlank()) {
+                throw new IllegalArgumentException("브랜드를 찾을 수 없습니다. id=" + id);
+            }
+            brandNames.add(name);
         }
 
-        // 2. GooglePlaceService용 Request 생성
+        // PlaceSearchRequest에 brandNames 리스트 세팅
         PlaceSearchRequest req = new PlaceSearchRequest();
-        req.setTextQuery(brandName);
+        req.setTextQueryList(brandNames);
         req.setLatitude(lat);
         req.setLongitude(lng);
-        req.setRadius(500.0); // 500m 반경 등
-        req.setPageSize(10); // 결과 개수 제한
-        req.setOpenNow(false); // 영업중만 필터는 필요에 따라
+        req.setRadius(500.0);
+        req.setPageSize(10);
 
-        // 3. Service 호출
         PlaceSearchResponse result = placeService.search(req);
 
         return BaseResponse.success(result);
     }
-
-
-
 }
 
 

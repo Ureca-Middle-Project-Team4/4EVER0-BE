@@ -14,6 +14,5 @@ public class PlaceSearchResponse {
         private Double lat;
         private Double lng;
         private String address;
-        private Boolean openNow;
     }
 }
