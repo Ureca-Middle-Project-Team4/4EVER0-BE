@@ -41,6 +41,7 @@ public class UserController {
             @Valid @RequestBody CreateUserRequest req
     ) {
         Long id = svc.createUser(req);
+        System.out.println("회원가입성공");
         return ResponseEntity.ok(id);
     }
 
