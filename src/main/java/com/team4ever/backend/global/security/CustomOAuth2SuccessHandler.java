@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
-    private static final String FRONTEND_URL = "http://localhost:5173/authcallback";
+    private static final String FRONTEND_URL = "http://localhost:5173";
 
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;
@@ -90,6 +90,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         response.addHeader("Set-Cookie", cookie.toString());
 
-        response.sendRedirect(FRONTEND_URL + "/");
+        response.sendRedirect(FRONTEND_URL + "/authcallback");
     }
 }

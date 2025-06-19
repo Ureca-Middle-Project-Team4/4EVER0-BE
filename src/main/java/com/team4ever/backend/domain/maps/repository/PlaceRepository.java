@@ -24,6 +24,7 @@ public class PlaceRepository {
 
     public PlaceSearchResponse searchPlaces(PlaceSearchRequest req) throws JSONException {
         List<PlaceSearchResponse.PlaceItem> allItems = new ArrayList<>();
+        int idCounter = 1;
 
         for (String brand : req.getTextQueryList()){
             String url = "https://places.googleapis.com/v1/places:searchText";
@@ -77,6 +78,8 @@ public class PlaceRepository {
                     }
 
                     PlaceSearchResponse.PlaceItem item = new PlaceSearchResponse.PlaceItem();
+                    item.setId(idCounter);
+                    idCounter++;
                     item.setName(placeName);
 
                     JSONObject locationObj = obj.optJSONObject("location");

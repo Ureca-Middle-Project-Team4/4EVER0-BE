@@ -10,6 +10,7 @@ public class PlaceSearchResponse {
 
     @Getter @Setter
     public static class PlaceItem {
+        private int id;
         private String name;
         private Double lat;
         private Double lng;
