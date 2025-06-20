@@ -71,18 +71,30 @@ public class MissionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MISSION_NOT_FOUND));
 
         UserMission userMission = userMissionRepository.findByUserIdAndMissionId(userId, missionId)
-                .orElseGet(() -> UserMission.builder()
-                        .userId(userId)
-                        .mission(mission)
-                        .progressCount(0)
-                        .status(MissionStatus.INP)
-                        .createdAt(LocalDateTime.now())
-                        .build());
+                .orElse(null);
 
-        if (userMission.getStatus() != MissionStatus.REC) {
-            userMission.increaseProgress();
+        // 없으면 새로 생성
+        if (userMission == null) {
+            userMission = UserMission.builder()
+                    .userId(userId)
+                    .mission(mission)
+                    .progressCount(0)
+                    .status(MissionStatus.INP)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+        }
+
+        // 진행도 증가 시도
+        boolean updated = userMission.increaseProgress();
+
+        // 무조건 저장 (신규 or 진행도 업데이트 시)
+        if (updated || userMission.getId() == null) {
             userMissionRepository.save(userMission);
         }
+
+//        log.info("✅ [미션 진행도 업데이트] userId: {}, missionId: {}, progress: {}/{}, status: {}",
+//                userId, missionId, userMission.getProgressCount(),
+//                mission.getTargetCount(), userMission.getStatus());
 
         return "미션 진행도가 업데이트되었습니다.";
     }

@@ -3,6 +3,7 @@ package com.team4ever.backend.domain.attendance.service;
 import com.team4ever.backend.domain.attendance.dto.AttendanceDto;
 import com.team4ever.backend.domain.attendance.entity.Attendance;
 import com.team4ever.backend.domain.attendance.repository.AttendanceRepository;
+import com.team4ever.backend.domain.mission.service.MissionService;
 import com.team4ever.backend.domain.user.Entity.User;
 import com.team4ever.backend.domain.user.repository.UserRepository;
 import com.team4ever.backend.global.exception.CustomException;
@@ -25,6 +26,7 @@ public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+    private final MissionService missionService;
 
     /**
      * 오늘 출석 체크
@@ -33,25 +35,29 @@ public class AttendanceService {
     public AttendanceDto checkToday(Long userId) {
         LocalDate today = LocalDate.now();
 
-        // 이미 오늘 출석했는지 확인
+        // 1. 중복 출석 여부 확인
         if (attendanceRepository.existsByUserIdAndCheckedDate(userId, today)) {
             throw new CustomException(ErrorCode.ALREADY_CHECKED); // 중복 출석일 때
 
         }
 
+        // 2. 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)); // 유저가 없을 때
 
-        // 1. 연속출석이 끊겼는지 체크하고 필요시 초기화
+        // 3. 연속 출석 여부 확인 및 streak 초기화
         checkAndResetStreakIfBroken(user);
 
-        // 2. 출석 기록 생성 및 저장
+        // 4. 출석 기록 저장
         Attendance attendance = new Attendance(userId, today);
         Attendance savedAttendance = attendanceRepository.save(attendance);
 
-        // 3. 연속출석일수 증가
+        // 5. 연속 출석 증가 및 저장
         user.setAttendanceStreak(user.getAttendanceStreak() + 1);
         userRepository.save(user);
+
+        // 6. 미션 진행도 +1 (미션 ID 3: 연속 출석 5회 달성)
+        missionService.updateMissionProgress(userId, 3L);
 
         log.info("유저 {}의 출석이 완료되었습니다. 연속출석: {}일", userId, user.getAttendanceStreak());
         // AttendanceDto 반환
