@@ -38,14 +38,21 @@ public class UserMission {
     @Column(name = "created_at")  // 컬럼명 명시
     private LocalDateTime createdAt;
 
-    public void increaseProgress() {
-        if (this.status == MissionStatus.REC) return;
+    public boolean increaseProgress() {
+        if (this.status == MissionStatus.REC) return false;
+
+        int target = mission.getTargetCount();
+
+        // 목표 이상인 경우 중복 증가 방지
+        if (this.progressCount >= target) return false;
 
         this.progressCount += 1;
 
-        if (this.progressCount >= mission.getTargetCount()) {
+        if (this.progressCount >= target) {
             this.status = MissionStatus.COM;
         }
+
+        return true;
     }
 
     public boolean isCompleted() {

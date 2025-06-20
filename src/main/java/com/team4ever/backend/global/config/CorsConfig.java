@@ -22,7 +22,7 @@ public class CorsConfig {
                 "http://localhost:5050",
                 "https://4-ever-0-fe.vercel.app"
         ));
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        config.setAllowedMethods(List.of("GET","POST","PUT", "PATCH", "DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setExposedHeaders(List.of("Set-Cookie"));

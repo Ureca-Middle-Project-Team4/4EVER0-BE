@@ -1,5 +1,6 @@
 package com.team4ever.backend.domain.user.Service;
 
+import com.team4ever.backend.domain.mission.service.MissionService;
 import com.team4ever.backend.domain.user.dto.CreateUserRequest;
 import com.team4ever.backend.domain.user.dto.UserResponse;
 import jakarta.servlet.http.Cookie;
@@ -34,11 +35,13 @@ public class UserServiceImpl implements UserService {
     private final UserCouponRepository userCouponRepository;
     private final JwtTokenProvider jwtProvider;
     private final HttpServletRequest request;
+    private final MissionService missionService;
 
     public UserServiceImpl(UserRepository repo,
                            UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
                            CouponLikeRepository couponLikeRepository,
                            UserCouponRepository userCouponRepository,
+                           MissionService missionService,
                            JwtTokenProvider jwtProvider,
                            HttpServletRequest request) {
         this.repo = repo;
@@ -47,6 +50,7 @@ public class UserServiceImpl implements UserService {
         this.userCouponRepository = userCouponRepository;
         this.jwtProvider = jwtProvider;
         this.request = request;
+        this.missionService = missionService;
     }
 
     @Override
@@ -59,6 +63,7 @@ public class UserServiceImpl implements UserService {
         Integer planId = req.getPlanId() != null
                 ? req.getPlanId()
                 : DEFAULT_PLAN_ID;
+
         User u = User.builder()
                 .planId(req.getPlanId())
                 .userId(req.getUserId())
@@ -69,7 +74,11 @@ public class UserServiceImpl implements UserService {
                 .attendanceStreak(0)
                 .point(0)
                 .build();
-        return repo.save(u).getId();
+
+        User savedUser = repo.save(u);
+        missionService.initializeUserMissions(savedUser.getId());
+
+        return savedUser.getId();
     }
 
     @Override
