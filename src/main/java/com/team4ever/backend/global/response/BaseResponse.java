@@ -7,7 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BaseResponse<T> {
-
 	private int status;
 	private String message;
 	private T data;
@@ -16,7 +15,8 @@ public class BaseResponse<T> {
 		return new BaseResponse<>(200, "요청 성공", data);
 	}
 
-	public static BaseResponse<?> error(ErrorCode errorCode) {
+	// ← change here: add <T> on the method signature
+	public static <T> BaseResponse<T> error(ErrorCode errorCode) {
 		return new BaseResponse<>(errorCode.getStatus().value(), errorCode.getMessage(), null);
 	}
 }
