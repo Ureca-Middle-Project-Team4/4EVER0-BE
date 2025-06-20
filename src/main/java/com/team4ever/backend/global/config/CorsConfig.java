@@ -20,9 +20,11 @@ public class CorsConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://localhost:5050",
-                "https://4-ever-0-fe.vercel.app"
+                "https://4-ever-0-fe.vercel.app",
+                "http://50.19.203.188:5050"
+
         ));
-        config.setAllowedMethods(List.of("GET","POST","PUT", "PATCH", "DELETE","OPTIONS"));
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setExposedHeaders(List.of("Set-Cookie"));
