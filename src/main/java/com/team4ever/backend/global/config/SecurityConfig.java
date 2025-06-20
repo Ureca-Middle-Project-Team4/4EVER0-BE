@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 "/api/popups",
                                 "/api/popups/**",
                                 "/api/coupons",
+                                "/api/coupons/**",
                                 "/api/chat",
 
                                 // ↓ Swagger

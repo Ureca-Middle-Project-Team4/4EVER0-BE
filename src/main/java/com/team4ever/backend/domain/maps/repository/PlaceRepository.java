@@ -33,20 +33,40 @@ public class PlaceRepository {
             headers.set("X-Goog-Api-Key", apiKey);
             headers.set("X-Goog-FieldMask", "places.displayName,places.location,places.formattedAddress");
 
-            JSONObject circle = new JSONObject();
-            circle.put("center", new JSONObject()
-                    .put("latitude", req.getLatitude())
-                    .put("longitude", req.getLongitude()));
-            circle.put("radius", req.getRadius());
+            double lat = req.getLatitude();
+            double lng = req.getLongitude();
+            double radiusMeters = req.getRadius();
 
-            JSONObject locationBias = new JSONObject();
-            locationBias.put("circle", circle);
+            double latDegreeDistance = 111000.0;
+            double lngDegreeDistance = 111000.0 * Math.cos(Math.toRadians(lat));
+
+            // 반경(m)를 위도, 경도 단위로 변환
+            double latOffset = radiusMeters / latDegreeDistance;
+            double lngOffset = radiusMeters / lngDegreeDistance;
+
+            // 직사각형 경계 좌표
+            JSONObject low = new JSONObject()
+                    .put("latitude", lat - latOffset)
+                    .put("longitude", lng - lngOffset);
+
+            JSONObject high = new JSONObject()
+                    .put("latitude", lat + latOffset)
+                    .put("longitude", lng + lngOffset);
+
+            // rectangle 객체 생성
+            JSONObject rectangle = new JSONObject()
+                    .put("low", low)
+                    .put("high", high);
+
+            // locationBias에 rectangle 넣기
+            JSONObject locationRestriction = new JSONObject();
+            locationRestriction.put("rectangle", rectangle);
 
             JSONObject body = new JSONObject();
             body.put("textQuery", brand);
             body.put("openNow", true);
             if (req.getPageSize() != null) body.put("pageSize", req.getPageSize());
-            body.put("locationBias", locationBias);
+            body.put("locationRestriction", locationRestriction);
             body.put("languageCode", "ko");
 
             HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);

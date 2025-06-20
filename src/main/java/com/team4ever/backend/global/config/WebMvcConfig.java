@@ -69,7 +69,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
                         // 쿠폰 공개 조회만 허용
                         "/api/coupons",         // GET /api/coupons 만 허용
-
+                        "/api/coupons/**",
                         // 일반 채팅
                         "/api/chat",
 
