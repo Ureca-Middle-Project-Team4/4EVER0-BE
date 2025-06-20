@@ -133,7 +133,7 @@ public class UBTIService {
 	}
 
 	/**
-	 * FastAPI 응답 파싱 (기존 로직 유지)
+	 * FastAPI 응답 파싱
 	 */
 	private Mono<UBTIResult> parseUBTIResult(String rawResponse) {
 		return Mono.fromCallable(() -> {
@@ -143,7 +143,6 @@ public class UBTIService {
 				JsonNode rootNode = objectMapper.readTree(rawResponse);
 				log.debug("파싱된 루트 노드 구조 확인");
 
-				// FastAPI BaseResponse 구조 확인
 				if (rootNode.has("status") && rootNode.has("data")) {
 					int status = rootNode.get("status").asInt();
 					log.info("FastAPI 응답 상태: {}", status);
@@ -211,13 +210,35 @@ public class UBTIService {
 			if (plans.size() != 2) {
 				log.warn("plans 배열 크기가 2가 아님: {}", plans.size());
 			}
+
+			// 각 plan에 id 필드 확인
+			for (int i = 0; i < plans.size(); i++) {
+				JsonNode plan = plans.get(i);
+				if (!plan.has("id")) {
+					log.warn("plan[{}]에 id 필드가 없음", i);
+				} else {
+					log.debug("plan[{}] id: {}", i, plan.get("id").asInt());
+				}
+			}
+		}
+
+		// recommendation.subscription id 필드 확인
+		if (recommendation != null && recommendation.has("subscription")) {
+			JsonNode subscription = recommendation.get("subscription");
+			if (!subscription.has("id")) {
+				log.warn("subscription에 id 필드가 없음");
+			} else {
+				log.debug("subscription id: {}", subscription.get("id").asInt());
+			}
 		}
 
 		UBTIResult result = objectMapper.treeToValue(dataNode, UBTIResult.class);
-		log.info("UBTI 데이터 파싱 성공: ubti_type={}, plans_count={}",
+		log.info("UBTI 데이터 파싱 성공: ubti_type={}, plans_count={}, subscription_id={}",
 				result.getUbti_type() != null ? result.getUbti_type().getCode() : "null",
 				result.getRecommendation() != null && result.getRecommendation().getPlans() != null ?
-						result.getRecommendation().getPlans().size() : 0);
+						result.getRecommendation().getPlans().size() : 0,
+				result.getRecommendation() != null && result.getRecommendation().getSubscription() != null ?
+						result.getRecommendation().getSubscription().getId() : "null");
 
 		return result;
 	}

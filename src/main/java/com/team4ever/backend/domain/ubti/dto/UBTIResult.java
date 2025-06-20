@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-@JsonIgnoreProperties(ignoreUnknown = true)  // 알려지지 않은 필드 무시
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UBTIResult {
 
 	@JsonProperty("ubti_type")
@@ -59,6 +59,9 @@ public class UBTIResult {
 		@ToString
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		public static class Plan {
+			@JsonProperty("id")
+			private int id;
+
 			@JsonProperty("name")
 			private String name;
 
@@ -71,6 +74,9 @@ public class UBTIResult {
 		@ToString
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		public static class Subscription {
+			@JsonProperty("id")
+			private int id;
+
 			@JsonProperty("name")
 			private String name;
 
