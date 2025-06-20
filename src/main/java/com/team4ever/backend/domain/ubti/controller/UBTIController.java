@@ -40,14 +40,14 @@ public class UBTIController {
 	@Operation(
 			summary = "UBTI 질문 스트리밍",
 			description = """
-            UBTI 질문을 실시간으로 스트리밍하여 전송합니다.
-            
-            **인증 필요:** 로그인한 사용자만 이용 가능
-            
-            **tone 파라미터:**
-            - `general`: 정중하고 전문적인 톤
-            - `muneoz`: 친근하고 활발한 MZ 톤
-            """
+			UBTI 질문을 실시간으로 스트리밍하여 전송합니다.
+			
+			**인증 필요:** 로그인한 사용자만 이용 가능
+			
+			**tone 파라미터:**
+			- `general`: 정중하고 전문적인 톤
+			- `muneoz`: 친근하고 활발한 MZ 톤
+			"""
 	)
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "질문 스트리밍 성공"),
@@ -71,8 +71,10 @@ public class UBTIController {
 		String tone = validateTone(req.getTone());
 		req.setTone(tone);
 
-		log.info("UBTI 질문 요청 - userId: {}, userPK: {}, session_id: {}, tone: {}",
-				userId, userPkId, req.getSession_id(), tone);
+		log.info(
+				"UBTI 질문 요청 - userId: {}, userPK: {}, session_id: {}, tone: {}",
+				userId, userPkId, req.getSession_id(), tone
+		);
 
 		return ubtiService.nextQuestionStream(req);
 	}
@@ -80,10 +82,10 @@ public class UBTIController {
 	@Operation(
 			summary = "UBTI 검사 최종 결과 조회",
 			description = """
-            모든 질문 완료 후 UBTI 타입과 요금제/구독 서비스 추천 결과를 반환합니다.
-            
-            **인증 필요:** 로그인한 사용자만 이용 가능
-            """
+			모든 질문 완료 후 UBTI 타입과 요금제/구독 서비스 추천 결과를 반환합니다.
+			
+			**인증 필요:** 로그인한 사용자만 이용 가능
+			"""
 	)
 	@ApiResponses({
 			@ApiResponse(
@@ -97,89 +99,49 @@ public class UBTIController {
 											name = "일반 말투 결과",
 											description = "정중한 말투로 응답",
 											value = """
-                            {
-                              "status": 200,
-                              "message": "요청 성공",
-                              "data": {
-                                "ubti_type": {
-                                  "code": "TK-SweetChoco",
-                                  "name": "말 많은 수다타코",
-                                  "emoji": "🍫",
-                                  "description": "편안한 소통을 좋아하는 타입입니다."
-                                },
-                                "summary": "고객님의 통신 성향을 분석한 결과입니다.",
-                                "recommendation": {
-                                  "plans": [
-                                    {
-                                      "id": 1,
-                                      "name": "너겟 26",
-                                      "description": "합리적인 요금으로 기본 데이터와 통화를 보장해 드려요!"
-                                    },
-                                    {
-                                      "id": 2, 
-                                      "name": "너겟 30",
-                                      "description": "데이터가 더 필요하신 분들을 위해! 가성비 좋고 소통도 자유롭게 가능해요"
-                                    }
-                                  ],
-                                  "subscription": {
-                                    "id": 1,
-                                    "name": "유튜브 프리미엄",
-                                    "description": "광고 없이 좋아하는 콘텐츠를 즐기며, 친구들과도 공유할 수 있는 최고의 선택입니다!"
-                                  }
-                                },
-                                "matching_type": {
-                                  "code": "TK-Greeny",
-                                  "name": "감성뮤직 초록타코",
-                                  "emoji": "🎶",
-                                  "description": "감성적인 취향을 가진 분들로, 음악과 감정의 연결을 소중히 여기는 타입이에요!"
-                                }
-                              }
-                            }
-                            """
-									),
-									@ExampleObject(
-											name = "무너 말투 결과",
-											description = "친근한 말투로 응답",
-											value = """
-                            {
-                              "status": 200,
-                              "message": "요청 성공",
-                              "data": {
-                                "ubti_type": {
-                                  "code": "TK-SweetChoco",
-                                  "name": "말 많은 수다타코",
-                                  "emoji": "🍫",
-                                  "description": "편안한 소통 완전 좋아하는 타입이야! 💜"
-                                },
-                                "summary": "네 답변 보니까 완전 이런 스타일이네! 🔥",
-                                "recommendation": {
-                                  "plans": [
-                                    {
-                                      "id": 1,
-                                      "name": "너겟 26",
-                                      "description": "합리적인 요금으로 기본 데이터와 통화를 보장해 드려요! 소통이 많은 분께 적합해요 📱"
-                                    },
-                                    {
-                                      "id": 2,
-                                      "name": "너겟 30", 
-                                      "description": "데이터가 더 필요하신 분들을 위해! 가성비 좋고 소통도 자유롭게 가능해요 💬"
-                                    }
-                                  ],
-                                  "subscription": {
-                                    "id": 1,
-                                    "name": "유튜브 프리미엄",
-                                    "description": "광고 없이 좋아하는 콘텐츠를 즐기며, 친구들과도 공유할 수 있는 최고의 선택입니다! 🎥"
-                                  }
-                                },
-                                "matching_type": {
-                                  "code": "TK-Greeny",
-                                  "name": "감성뮤직 초록타코",
-                                  "emoji": "🎶",
-                                  "description": "감성적인 취향을 가진 분들로, 음악과 감정의 연결을 소중히 여기는 타입이에요!"
-                                }
-                              }
-                            }
-                            """
+							{
+							   "status": 200,
+							   "message": "요청 성공",
+							   "data": {
+							     "ubti_type": {
+							       "id": 6,
+							       "code": "TK-Spicy",
+							       "name": "액티브한 매콤타코",
+							       "emoji": "🌶",
+							       "description": "어디서든 분위기 메이커인 에너자이저 타입이에요. 활발하게 소통하는 걸 좋아하고, 데이터도 빵빵하게 쓰는 걸 선호해요.",
+							       "image_url": "https://example.com/images/spicy.png"
+							     },
+							     "summary": "🍽 오늘의 추천 타코야키 한 접시 나왔습니다!\\n\\n회원님은 소통을 즐기고 실용적인 선택을 중요하게 생각하시는 분이에요. 덕분에 활기차고 매콤한 TK-Spicy 타입이랑 정말 잘 어울리시더라고요!\\n\\n매일매일 연결되는 대화와 데이터 사용이 일상이신 분에게 꼭 맞는 스타일이에요.",
+							     "recommendation": {
+							       "plans": [
+							         {
+							           "id": 6,
+							           "name": "너겟 34",
+							           "description": "데이터 걱정 없이 쓰면서도 통신비는 합리적으로!\\n\\n실속 챙기는 분께 딱이에요 👍"
+							         },
+							         {
+							           "id": 4,
+							           "name": "너겟 32",
+							           "description": "적당한 데이터와 통화가 포함되어 있어 실용적이에요!\\n\\n일상적인 사용에 적합한 요금제입니다 💡"
+							         }
+							       ],
+							       "subscription": {
+							         "id": 1,
+							         "name": "유튜브 프리미엄",
+							         "description": "광고 없이 콘텐츠를 즐길 수 있는 서비스! 다양한 OTT 혜택으로 더 풍성한 경험을 제공해요 🎥"
+							       }
+							     },
+							     "matching_type": {
+							       "id": 7,
+							       "code": "TK-SweetChoco",
+							       "name": "말 많은 수다타코",
+							       "emoji": "🍫",
+							       "description": "감정 나누는 걸 소중하게 여기는 따뜻한 커뮤니케이터 타입이에요. 톡도 통화도 자주 하는 분들이 많답니다!",
+							       "image_url": "https://example.com/images/sweet.png"
+							     }
+							   }
+							 }
+							"""
 									)
 							}
 					)
@@ -204,8 +166,10 @@ public class UBTIController {
 		String tone = validateTone(req.getTone());
 		req.setTone(tone);
 
-		log.info("UBTI 결과 요청 - userId: {}, userPK: {}, session_id: {}, tone: {}",
-				userId, userPkId, req.getSession_id(), tone);
+		log.info(
+				"UBTI 결과 요청 - userId: {}, userPK: {}, session_id: {}, tone: {}",
+				userId, userPkId, req.getSession_id(), tone
+		);
 
 		return ubtiService.finalResultWrapped(req);
 	}

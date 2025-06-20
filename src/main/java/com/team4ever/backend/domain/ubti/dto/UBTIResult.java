@@ -30,6 +30,9 @@ public class UBTIResult {
 	@ToString
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class UBTIType {
+		@JsonProperty("id")
+		private int id;
+
 		@JsonProperty("code")
 		private String code;
 
@@ -41,6 +44,9 @@ public class UBTIResult {
 
 		@JsonProperty("description")
 		private String description;
+
+		@JsonProperty("image_url")
+		private String image_url;
 	}
 
 	@Getter
