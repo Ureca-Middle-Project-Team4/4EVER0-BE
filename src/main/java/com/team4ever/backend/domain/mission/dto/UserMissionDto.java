@@ -2,6 +2,7 @@ package com.team4ever.backend.domain.mission.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.team4ever.backend.domain.mission.entity.MissionStatus;
+import com.team4ever.backend.domain.mission.entity.MissionType;
 import com.team4ever.backend.domain.mission.entity.UserMission;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +40,9 @@ public class UserMissionDto {
     @JsonProperty("is_completed")
     private boolean isCompleted;
 
+    @JsonProperty("type")
+    private MissionType type;
+
     public static UserMissionDto from(UserMission entity) {
         return new UserMissionDto(
                 entity.getId(),
@@ -50,7 +54,8 @@ public class UserMissionDto {
                 entity.getStatus(),
                 entity.getMission().getRewardPoint(),
                 entity.getCreatedAt(),
-                entity.isCompleted()
+                entity.isCompleted(),
+                entity.getMission().getType()
         );
     }
 }
