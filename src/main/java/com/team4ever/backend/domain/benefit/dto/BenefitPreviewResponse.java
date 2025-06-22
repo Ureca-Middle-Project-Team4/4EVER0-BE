@@ -14,12 +14,14 @@ public class BenefitPreviewResponse {
     private LocalDate date;
     @JsonProperty("image_url")
     private String imageUrl;
+    private String category;
 
     public static BenefitPreviewResponse from(Benefit benefit) {
         return new BenefitPreviewResponse(
                 benefit.getBrand().getName(),
                 benefit.getBenefitDate(),
-                benefit.getBrand().getImageUrl()
+                benefit.getBrand().getImageUrl(),
+                benefit.getBrand().getCategory()
         );
     }
 }
