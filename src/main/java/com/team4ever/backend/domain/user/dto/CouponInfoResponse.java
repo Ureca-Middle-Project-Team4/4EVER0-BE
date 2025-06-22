@@ -1,12 +1,34 @@
 package com.team4ever.backend.domain.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record CouponInfoResponse(
-    Long couponId,
-    String title,
-    BrandInfo brand,
-    boolean isUsed,
-    String startDate,
-    String endDate
+        @JsonProperty("coupon_id")
+        Long couponId,
+
+        @JsonProperty("title")
+        String title,
+
+        @JsonProperty("brand")
+        BrandInfo brand,
+
+        @JsonProperty("is_used")
+        boolean isUsed,
+
+        @JsonProperty("start_date")
+        String startDate,
+
+        @JsonProperty("end_date")
+        String endDate
 ) {
-    public record BrandInfo(Long id, String name, String imageUrl) {}
+    public record BrandInfo(
+            @JsonProperty("id")
+            Long id,
+
+            @JsonProperty("name")
+            String name,
+
+            @JsonProperty("image_url")
+            String imageUrl
+    ) {}
 }
