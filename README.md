@@ -5,7 +5,7 @@
 > 🐙 무너와 함께하는  
 > ✨ *MZ세대를 위한 스마트한 LG U+ 혜택 큐레이션 서비스 백엔드* ✨  
 
----
+
 
 ## 📦 프로젝트 개요
 
@@ -13,7 +13,7 @@
 - **역할**: 프론트엔드 서비스에 필요한 API 제공, 인증 및 사용자 관리, AI 서버와 연동된 데이터 처리  
 - **개발 기간**: 2025.06.04 ~ 2025.06.26  
 
----
+
 
 ## 🗂️ 폴더 구조
 src/main/java/com/team4ever/backend/
@@ -30,7 +30,7 @@ src/main/java/com/team4ever/backend/
 └── common/                 # 유틸, 상수 등
 
 
----
+
 
 ## ✅ 공통 응답 및 예외 처리
 
@@ -45,7 +45,7 @@ src/main/java/com/team4ever/backend/
   "data": { ... }
 }
 
----
+
 
 ### 🚨 Global Exception Handling
 
@@ -62,7 +62,7 @@ src/main/java/com/team4ever/backend/
 - **Redis**: 토큰 세션 관리 및 자동 만료 처리
 - **Spring Security**: Role 기반 인증 및 경로 보호
 
----
+
 
 ## 🧭 주요 기능 요약
 
@@ -78,7 +78,7 @@ src/main/java/com/team4ever/backend/
 - 출석 체크 → 캘린더 UI에 바로 반영
 - 미션 진행률, 보상 수령 처리
 
----
+
 
 ## 🛠 기술 스택
 
