@@ -1,6 +1,8 @@
 package com.team4ever.backend.domain.user.Service;
 
 import com.team4ever.backend.domain.mission.service.MissionService;
+import com.team4ever.backend.domain.plan.entity.Plan;
+import com.team4ever.backend.domain.plan.repository.PlanRepository;
 import com.team4ever.backend.domain.user.dto.CreateUserRequest;
 import com.team4ever.backend.domain.user.dto.UserResponse;
 import jakarta.servlet.http.Cookie;
@@ -36,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtProvider;
     private final HttpServletRequest request;
     private final MissionService missionService;
+    private final PlanRepository planRepository;
 
     public UserServiceImpl(UserRepository repo,
                            UserSubscriptionCombinationRepository userSubscriptionCombinationRepository,
@@ -43,7 +46,8 @@ public class UserServiceImpl implements UserService {
                            UserCouponRepository userCouponRepository,
                            MissionService missionService,
                            JwtTokenProvider jwtProvider,
-                           HttpServletRequest request) {
+                           HttpServletRequest request,
+                           PlanRepository planRepository) {
         this.repo = repo;
         this.userSubscriptionCombinationRepository = userSubscriptionCombinationRepository;
         this.couponLikeRepository = couponLikeRepository;
@@ -51,6 +55,7 @@ public class UserServiceImpl implements UserService {
         this.jwtProvider = jwtProvider;
         this.request = request;
         this.missionService = missionService;
+        this.planRepository = planRepository;
     }
 
     @Override
@@ -60,12 +65,20 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("이미 존재하는 userId 입니다.");
         }
 
-        Integer planId = req.getPlanId() != null
-                ? req.getPlanId()
-                : DEFAULT_PLAN_ID;
-
+        Integer planId = req.getPlanId();
+        if (planId == null) {
+            List<Plan> activePlans = planRepository.findByIsActiveTrue();
+            if (!activePlans.isEmpty()) {
+                Plan randomPlan = activePlans.get((int) (Math.random() * activePlans.size()));
+                planId = randomPlan.getId();
+                log.info("무작위 요금제 부여 - planId: {}", planId);
+            } else {
+                log.error("활성화된 요금제가 없습니다. 사용자 생성 불가");
+                throw new CustomException(ErrorCode.PLAN_NOT_FOUND);
+            }
+        }
         User u = User.builder()
-                .planId(req.getPlanId())
+                .planId(planId)
                 .userId(req.getUserId())
                 .email(req.getEmail())
                 .phoneNumber(req.getPhoneNumber())
