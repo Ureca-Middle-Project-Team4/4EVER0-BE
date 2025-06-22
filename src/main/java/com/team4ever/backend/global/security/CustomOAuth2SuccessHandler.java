@@ -81,6 +81,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         System.out.println(">>> RT=" + refreshToken);
 
         ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", accessToken)
+                .domain("50.19.203.188")
                 .path("/")
                 .maxAge(60 * 60 * 24)
                 .httpOnly(true)
