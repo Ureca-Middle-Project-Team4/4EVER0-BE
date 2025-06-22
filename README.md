@@ -47,7 +47,7 @@ src/main/java/com/team4ever/backend/
   "message": "요청 성공",
   "data": { ... }
 }
-
+```
 
 
 ### 🚨 Global Exception Handling
