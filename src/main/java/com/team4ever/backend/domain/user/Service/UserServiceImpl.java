@@ -252,7 +252,9 @@ public class UserServiceImpl implements UserService {
                                     uc.getCoupon().getBrand().getName(),
                                     uc.getCoupon().getBrand().getImageUrl()
                             ),
-                            uc.getIsUsed()
+                            uc.getIsUsed(),
+                            uc.getCoupon().getStartDate().toString(),
+                            uc.getCoupon().getEndDate().toString()
                     ))
                     .collect(Collectors.toCollection(ArrayList::new));
 
