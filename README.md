@@ -21,6 +21,7 @@
 
 
 ## 🗂️ 폴더 구조
+```json
 src/main/java/com/team4ever/backend/
 ├── global/
 │   ├── config/             # Swagger 등 설정
@@ -33,7 +34,7 @@ src/main/java/com/team4ever/backend/
 │       ├── repository/     # 데이터베이스 처리
 │       └── entity/         # 엔티티 정의
 └── common/                 # 유틸, 상수 등
-
+```
 
 &nbsp;
 &nbsp;
