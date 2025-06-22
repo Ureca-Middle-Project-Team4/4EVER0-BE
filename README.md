@@ -16,8 +16,8 @@
 - **역할**: 프론트엔드 서비스에 필요한 API 제공, 인증 및 사용자 관리, AI 서버와 연동된 데이터 처리  
 - **개발 기간**: 2025.06.04 ~ 2025.06.26  
 
-<br>
-<br>
+&nbsp;
+&nbsp;
 
 
 ## 🗂️ 폴더 구조
@@ -35,7 +35,8 @@ src/main/java/com/team4ever/backend/
 └── common/                 # 유틸, 상수 등
 
 
-
+&nbsp;
+&nbsp;
 
 
 ## ✅ 공통 응답 및 예외 처리
@@ -68,8 +69,8 @@ src/main/java/com/team4ever/backend/
 - **Redis**: 토큰 세션 관리 및 자동 만료 처리
 - **Spring Security**: Role 기반 인증 및 경로 보호
 
-
-
+&nbsp;
+&nbsp;
 
 ## 🧭 주요 기능 요약
 
@@ -85,8 +86,8 @@ src/main/java/com/team4ever/backend/
 - 출석 체크 → 캘린더 UI에 바로 반영
 - 미션 진행률, 보상 수령 처리
 
-
-
+&nbsp;
+&nbsp;
 
 ## 🛠 기술 스택
 
@@ -101,7 +102,8 @@ src/main/java/com/team4ever/backend/
 | **Infra**     | AWS EC2, AWS RDS                              |
 | **Dev Tools** | Gradle, GitHub, Notion, Jira                  |
 
----
+&nbsp;
+&nbsp;
 
 ## 📑 프로젝트 문서
 - [WBS](https://docs.google.com/spreadsheets/d/1ln5VudFdBKMbaNANwzZyW0CGLYC_R9Xf/edit?usp=sharing&ouid=101077923369398316818&rtpof=true&sd=true)
