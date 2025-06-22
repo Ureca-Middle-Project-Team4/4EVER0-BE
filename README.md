@@ -7,11 +7,13 @@
 
 
 
+
 ## 📦 프로젝트 개요
 
 - **레포지토리명**: 4EVER0-BE  
 - **역할**: 프론트엔드 서비스에 필요한 API 제공, 인증 및 사용자 관리, AI 서버와 연동된 데이터 처리  
 - **개발 기간**: 2025.06.04 ~ 2025.06.26  
+
 
 
 
@@ -28,6 +30,7 @@ src/main/java/com/team4ever/backend/
 │       ├── repository/     # 데이터베이스 처리
 │       └── entity/         # 엔티티 정의
 └── common/                 # 유틸, 상수 등
+
 
 
 
@@ -53,7 +56,7 @@ src/main/java/com/team4ever/backend/
 - 에러 코드 Enum: ErrorCode.java
 - 실패 응답은 ApiResponse.fail(...) 형태로 통일 처리
 
----
+
 
 ### 🔐 인증 및 보안
 
@@ -61,6 +64,7 @@ src/main/java/com/team4ever/backend/
 - **JWT 기반 인증**: Access / Refresh Token 발급 및 갱신
 - **Redis**: 토큰 세션 관리 및 자동 만료 처리
 - **Spring Security**: Role 기반 인증 및 경로 보호
+
 
 
 
@@ -77,6 +81,7 @@ src/main/java/com/team4ever/backend/
 #### 🎯 출석 및 미션 기능
 - 출석 체크 → 캘린더 UI에 바로 반영
 - 미션 진행률, 보상 수령 처리
+
 
 
 
