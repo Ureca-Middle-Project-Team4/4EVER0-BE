@@ -86,7 +86,7 @@ app:
     tokenSecret: ${APP_AUTH_TOKEN_SECRET}
     accessTokenExpirationMsec: ${APP_AUTH_ACCESS_TOKEN_EXPIRATION_MSEC}
     refreshTokenExpirationMsec: ${APP_AUTH_REFRESH_TOKEN_EXPIRATION_MSEC}
-  baseUrl: http://50.19.203.188:${server.port}
+  baseUrl: https://moonoz.click
 
 server:
   port: 5050

@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
-    private static final String FRONTEND_URL = "http://localhost:5173";
+    private static final String FRONTEND_URL = "https://4-ever-0-fe.vercel.app";
 
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;
@@ -81,7 +81,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         System.out.println(">>> RT=" + refreshToken);
 
         ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", accessToken)
-                .domain("50.19.203.188")
+                .domain("moonoz.click")
                 .path("/")
                 .maxAge(60 * 60 * 24)
                 .httpOnly(true)
