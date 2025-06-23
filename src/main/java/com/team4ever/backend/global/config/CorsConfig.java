@@ -20,7 +20,8 @@ public class CorsConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://localhost:5050",
-                "https://4-ever-0-fe.vercel.app"
+                "https://4-ever-0-fe.vercel.app",
+                "https://moonoz.click"
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT", "PATCH", "DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
