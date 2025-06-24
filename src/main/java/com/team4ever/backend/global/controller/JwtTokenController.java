@@ -92,4 +92,9 @@ public class JwtTokenController {
         // 5) 쿠키만 던지고 빈 200 OK
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/healthcheck")
+    public ResponseEntity<Void> testapi() {
+        return ResponseEntity.ok().build();
+    }
 }
