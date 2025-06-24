@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Component
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
-    private static final String FRONTEND_URL = "https://4-ever-0-fe.vercel.app/";
+    private static final String FRONTEND_URL = "https://4-ever-0-fe.vercel.app";
 
     private final JwtTokenProvider jwtProvider;
     private final RedisService redisService;

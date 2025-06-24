@@ -22,19 +22,18 @@ public class SecurityConfig {
     private final RedisService redisService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // ↓ RedisTemplate 대신 AuthorizationRequestRepository 를 주입받도록 변경
     public SecurityConfig(
             AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRepo,
             CustomOAuth2UserService customUserService,
             CustomOAuth2SuccessHandler successHandler,
             RedisService redisService,
-            JwtTokenProvider jwtTokenProvider
+            JwtTokenProvider jwtTokenProvider     // 추가!
     ) {
         this.authorizationRepo = authorizationRepo;
         this.customUserService = customUserService;
         this.successHandler    = successHandler;
         this.redisService      = redisService;
-        this.jwtTokenProvider  = jwtTokenProvider;
+        this.jwtTokenProvider  = jwtTokenProvider; // 추가!
     }
 
     @Bean
