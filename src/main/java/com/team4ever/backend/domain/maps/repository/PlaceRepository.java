@@ -26,7 +26,8 @@ public class PlaceRepository {
         List<PlaceSearchResponse.PlaceItem> allItems = new ArrayList<>();
         int idCounter = 1;
 
-        for (String brand : req.getTextQueryList()){
+        // 브랜드별로 처리
+        for (String brand : req.getTextQueryList()) {
             String url = "https://places.googleapis.com/v1/places:searchText";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -37,14 +38,13 @@ public class PlaceRepository {
             double lng = req.getLongitude();
             double radiusMeters = req.getRadius();
 
+            // 직사각형 경계 좌표 계산
             double latDegreeDistance = 111000.0;
             double lngDegreeDistance = 111000.0 * Math.cos(Math.toRadians(lat));
 
-            // 반경(m)를 위도, 경도 단위로 변환
             double latOffset = radiusMeters / latDegreeDistance;
             double lngOffset = radiusMeters / lngDegreeDistance;
 
-            // 직사각형 경계 좌표
             JSONObject low = new JSONObject()
                     .put("latitude", lat - latOffset)
                     .put("longitude", lng - lngOffset);
@@ -53,17 +53,15 @@ public class PlaceRepository {
                     .put("latitude", lat + latOffset)
                     .put("longitude", lng + lngOffset);
 
-            // rectangle 객체 생성
             JSONObject rectangle = new JSONObject()
                     .put("low", low)
                     .put("high", high);
 
-            // locationBias에 rectangle 넣기
             JSONObject locationRestriction = new JSONObject();
             locationRestriction.put("rectangle", rectangle);
 
             JSONObject body = new JSONObject();
-            body.put("textQuery", brand);
+            body.put("textQuery", brand);  // 브랜드 이름을 쿼리로 사용
             body.put("openNow", true);
             if (req.getPageSize() != null) body.put("pageSize", req.getPageSize());
             body.put("locationRestriction", locationRestriction);
@@ -82,19 +80,17 @@ public class PlaceRepository {
                     JSONObject displayNameObj = obj.optJSONObject("displayName");
                     if (displayNameObj == null) continue;
 
-                    // languageCode가 "ko"인지 확인
+                    // "ko" 언어 코드만 처리
                     String langCode = displayNameObj.optString("languageCode", "");
                     if (!"ko".equals(langCode)) {
-                        // 한글 응답이 아니면 건너뜀
                         continue;
                     }
 
                     String placeName = displayNameObj.optString("text", "");
 
-                    // 브랜드명 포함 여부 체크 (예: brand 변수에 브랜드명 저장되어 있다고 가정)
-                    // brand 변수는 해당 API 호출 시 사용한 브랜드명이어야 합니다.
+                    // 브랜드명이 포함되어 있는지 확인
                     if (!placeName.toLowerCase().contains(brand.toLowerCase())) {
-                        continue;  // 브랜드명이 포함되지 않으면 건너뜀
+                        continue;
                     }
 
                     PlaceSearchResponse.PlaceItem item = new PlaceSearchResponse.PlaceItem();
@@ -102,6 +98,10 @@ public class PlaceRepository {
                     idCounter++;
                     item.setName(placeName);
 
+                    // 브랜드 이름을 PlaceItem에 추가
+                    item.setBrandName(brand);  // brand_name을 PlaceItem에 설정
+
+                    // 위치 및 주소 정보 설정
                     JSONObject locationObj = obj.optJSONObject("location");
                     if (locationObj != null) {
                         item.setLat(locationObj.optDouble("latitude", 0.0));
@@ -114,6 +114,7 @@ public class PlaceRepository {
             }
         }
 
+        // 최종 결과 반환
         PlaceSearchResponse result = new PlaceSearchResponse();
         result.setPlaces(allItems);
         return result;

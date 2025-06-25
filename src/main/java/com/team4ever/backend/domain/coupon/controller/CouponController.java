@@ -375,6 +375,7 @@ public class CouponController {
                     content = @Content(mediaType = "application/json")
             )
     })
+
     @GetMapping("/nearby")
     public BaseResponse<PlaceSearchResponse> getNearbyCoupons(
             @RequestParam Double lat,
@@ -382,27 +383,37 @@ public class CouponController {
             @RequestParam List<Integer> brand_id) throws JSONException {
 
         // brand_id 리스트 순회하며 브랜드명 조회 및 요청 처리
-        List<String> brandNames = new ArrayList<>();
+        List<Brand> brands = new ArrayList<>();
         for (Integer id : brand_id) {
-            Brand brand = brandRepository.findBrandId(id);
-            String name = brand.getName();
-            if (name == null || name.isBlank()) {
+            Brand brand = brandRepository.findBrandId(id);  // 브랜드 ID로 브랜드 정보 찾기
+            if (brand == null) {
                 throw new IllegalArgumentException("브랜드를 찾을 수 없습니다. id=" + id);
             }
-            brandNames.add(name);
+            brands.add(brand); // 브랜드 객체 리스트에 추가
         }
 
-        // PlaceSearchRequest에 brandNames 리스트 세팅
+        // PlaceSearchRequest에 브랜드 이름을 텍스트 쿼리로 세팅
         PlaceSearchRequest req = new PlaceSearchRequest();
-        req.setTextQueryList(brandNames);
+
+        // textQueryList 초기화: null일 경우 빈 리스트로 초기화
+        if (req.getTextQueryList() == null) {
+            req.setTextQueryList(new ArrayList<>());
+        }
+
+        // 각 브랜드 이름을 텍스트 쿼리 리스트에 추가
+        for (Brand brand : brands) {
+            req.getTextQueryList().add(brand.getName()); // 브랜드 이름을 쿼리에 추가
+        }
+
         req.setLatitude(lat);
         req.setLongitude(lng);
         req.setRadius(500.0);
         req.setPageSize(10);
 
+        // 장소 검색 서비스 호출
         PlaceSearchResponse result = placeService.search(req);
 
-        return BaseResponse.success(result);
+        return BaseResponse.success(result);  // 결과 반환
     }
 }
 
