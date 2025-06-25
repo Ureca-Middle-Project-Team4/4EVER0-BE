@@ -89,5 +89,29 @@ public class UBTIResult {
 			@JsonProperty("description")
 			private String description;
 		}
+
+		@JsonProperty("brand")
+		private Brand brand;
+
+		@Getter
+		@Setter
+		@ToString
+		@JsonIgnoreProperties(ignoreUnknown = true)
+		public static class Brand {
+			@JsonProperty("id")
+			private int id;
+
+			@JsonProperty("name")
+			private String name;
+
+			@JsonProperty("image_url")
+			private String image_url;
+
+			@JsonProperty("description")
+			private String description;
+
+			@JsonProperty("category")
+			private String category;
+		}
 	}
 }
