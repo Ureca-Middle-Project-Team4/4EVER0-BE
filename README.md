@@ -93,14 +93,14 @@ src/main/java/com/team4ever/backend/
 ## 🛠 기술 스택
 
 | 분야            | 기술 스택                                         |
-| ------------- | --------------------------------------------- |
+| ------------- |-----------------------------------------------|
 | **Backend**   | Spring Boot, Spring Security, Spring Data JPA |
 | **DB**        | MySQL, Redis                                  |
 | **Auth**      | OAuth2, JWT                                   |
 | **API 문서화**   | Swagger 3.0 (`springdoc-openapi`)             |
 | **API 연동**    | Naver Search API, Google Custom Search API    |
 | **CI/CD**     | GitHub Actions                                |
-| **Infra**     | AWS EC2, AWS RDS                              |
+| **Infra**     | AWS EC2, AWS RDS, AWS Route 53                |
 | **Dev Tools** | Gradle, GitHub, Notion, Jira                  |
 
 &nbsp;
