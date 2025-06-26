@@ -85,7 +85,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd ~/myapp
+            cd ~/4ever0_BE
             git pull origin dev
             # Docker Hub에서 새 이미지 가져오기
             docker-compose pull
